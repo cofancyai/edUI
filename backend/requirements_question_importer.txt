@@ -1,0 +1,15 @@
+# PDF Question Extraction and Import Tool Requirements
+
+# PDF Processing
+PyPDF2==3.0.1
+pdfplumber==0.10.3  # Alternative PDF library with better text extraction
+
+# AI/LLM
+mistralai==1.0.0
+
+# Database
+supabase==2.3.4
+
+# Utilities
+python-dotenv==1.0.0
+requests==2.31.0
