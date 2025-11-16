@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Bell, User, LogOut } from 'lucide-react';
 import AITutor from './AITutor';
 import Schemes from './Schemes';
+import ExamAlert from './ExamAlert';
 import Navigation from './Navigation';
 import Quiz from './quiz/Quiz';
 import ComingSoon from './ComingSoon';
@@ -120,6 +121,10 @@ const StudentDashboard: React.FC = () => {
           <Schemes selectedLanguage="english" isAuthenticated={true} />
         )}
 
+        {selectedMenu === 'Exam Alert' && (
+          <ExamAlert selectedLanguage="english" isAuthenticated={true} />
+        )}
+
         {selectedMenu === 'Exam bot' && (
           <Quiz />
         )}
@@ -132,7 +137,7 @@ const StudentDashboard: React.FC = () => {
           <Quiz initialTopic="Current Affairs" />
         )}
 
-        {!['AI Tutor', 'Schemes', 'Exam bot', 'Mock Test', 'Current Affairs'].includes(selectedMenu) && (
+        {!['AI Tutor', 'Schemes', 'Exam Alert', 'Exam bot', 'Mock Test', 'Current Affairs'].includes(selectedMenu) && (
           <ComingSoon featureName={selectedMenu} />
         )}
       </div>
