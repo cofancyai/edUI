@@ -6,6 +6,7 @@ import ExamAlert from './ExamAlert';
 import Navigation from './Navigation';
 import Quiz from './quiz/Quiz';
 import ExamBot from './examBot/ExamBot';
+import Aptitude from './Aptitude';
 import ComingSoon from './ComingSoon';
 
 const StudentDashboard: React.FC = () => {
@@ -130,6 +131,10 @@ const StudentDashboard: React.FC = () => {
           <ExamBot selectedLanguage="english" isAuthenticated={true} />
         )}
 
+        {selectedMenu === 'Aptitude' && (
+          <Aptitude selectedLanguage="english" isAuthenticated={true} />
+        )}
+
         {selectedMenu === 'Mock Test' && (
           <Quiz />
         )}
@@ -138,7 +143,7 @@ const StudentDashboard: React.FC = () => {
           <Quiz initialTopic="Current Affairs" />
         )}
 
-        {!['AI Tutor', 'Schemes', 'Exam Alert', 'Exam bot', 'Mock Test', 'Current Affairs'].includes(selectedMenu) && (
+        {!['AI Tutor', 'Schemes', 'Exam Alert', 'Exam bot', 'Aptitude', 'Mock Test', 'Current Affairs'].includes(selectedMenu) && (
           <ComingSoon featureName={selectedMenu} />
         )}
       </div>
