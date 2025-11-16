@@ -8,6 +8,7 @@ import Quiz from './quiz/Quiz';
 import ExamBot from './examBot/ExamBot';
 import Aptitude from './Aptitude';
 import CurrentAffairs from './CurrentAffairs';
+import MockInterview from './MockInterview';
 import ComingSoon from './ComingSoon';
 
 const StudentDashboard: React.FC = () => {
@@ -144,7 +145,11 @@ const StudentDashboard: React.FC = () => {
           <CurrentAffairs selectedLanguage="english" isAuthenticated={true} />
         )}
 
-        {!['AI Tutor', 'Schemes', 'Exam Alert', 'Exam bot', 'Aptitude', 'Mock Test', 'Current Affairs'].includes(selectedMenu) && (
+        {selectedMenu === 'Mock Interview' && (
+          <MockInterview selectedLanguage="english" isAuthenticated={true} />
+        )}
+
+        {!['AI Tutor', 'Schemes', 'Exam Alert', 'Exam bot', 'Aptitude', 'Mock Test', 'Current Affairs', 'Mock Interview'].includes(selectedMenu) && (
           <ComingSoon featureName={selectedMenu} />
         )}
       </div>
