@@ -5,6 +5,7 @@ import Schemes from './Schemes';
 import ExamAlert from './ExamAlert';
 import Navigation from './Navigation';
 import Quiz from './quiz/Quiz';
+import ExamBot from './examBot/ExamBot';
 import ComingSoon from './ComingSoon';
 
 const StudentDashboard: React.FC = () => {
@@ -126,7 +127,7 @@ const StudentDashboard: React.FC = () => {
         )}
 
         {selectedMenu === 'Exam bot' && (
-          <Quiz />
+          <ExamBot selectedLanguage="english" isAuthenticated={true} />
         )}
 
         {selectedMenu === 'Mock Test' && (
