@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import StudentDashboard from './components/StudentDashboard';
+import StudentDashboard from '../StudentDashboard';
 
 const App: React.FC = () => {
   return (
