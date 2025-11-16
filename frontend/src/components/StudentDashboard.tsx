@@ -7,6 +7,7 @@ import Navigation from './Navigation';
 import Quiz from './quiz/Quiz';
 import ExamBot from './examBot/ExamBot';
 import Aptitude from './Aptitude';
+import CurrentAffairs from './CurrentAffairs';
 import ComingSoon from './ComingSoon';
 
 const StudentDashboard: React.FC = () => {
@@ -140,7 +141,7 @@ const StudentDashboard: React.FC = () => {
         )}
 
         {selectedMenu === 'Current Affairs' && (
-          <Quiz initialTopic="Current Affairs" />
+          <CurrentAffairs selectedLanguage="english" isAuthenticated={true} />
         )}
 
         {!['AI Tutor', 'Schemes', 'Exam Alert', 'Exam bot', 'Aptitude', 'Mock Test', 'Current Affairs'].includes(selectedMenu) && (
