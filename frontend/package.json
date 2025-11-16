@@ -1,25 +1,29 @@
 {
-  "name": "prep",
+  "name": "prepnx-frontend",
   "version": "1.0.0",
-  "description": "",
-  "main": "answerEvaluation.js",
+  "description": "PrepNX Premium EdTech Platform",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "@supabase/supabase-js": "^2.81.1",
+    "@vapi-ai/web": "^2.1.0",
     "axios": "^1.13.2",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^4.17.1",
-    "form-data": "^4.0.4",
-    "multer": "^2.0.2",
-    "node-cron": "^4.2.1",
-    "rss-parser": "^3.13.0"
+    "jspdf": "^2.5.2",
+    "lucide-react": "^0.263.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.27.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
   }
 }
