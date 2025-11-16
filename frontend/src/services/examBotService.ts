@@ -1,510 +1,465 @@
 /**
- * ExamBot Service - Supabase Integration
- * This service handles all database operations for the ExamBot question bank
+ * ExamBot Service - Updated for Existing Database Schema
+ * Integrates with your existing Supabase database structure
  */
 
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client
-// TODO: Replace with your actual Supabase URL and anon key from environment variables
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Types matching our database schema
-export interface Exam {
-  id: string;
-  code: string;
-  name: string;
-  icon: string;
+// Types matching your existing database schema
+export interface ExamCategory {
+  id: number;
+  category_name: string;
   description: string;
-  active: boolean;
-}
-
-export interface Subject {
-  id: string;
-  exam_id: string;
-  code: string;
-  name: string;
-  icon: string;
-  description: string;
-  display_order: number;
-  active: boolean;
-}
-
-export interface Chapter {
-  id: string;
-  subject_id: string;
-  code: string;
-  name: string;
-  description: string;
-  display_order: number;
-  active: boolean;
+  is_active: boolean;
+  created_at: string;
 }
 
 export interface Topic {
   id: string;
-  chapter_id: string;
-  code: string;
   name: string;
   description: string;
-  display_order: number;
-  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Subtopic {
+  id: string;
+  topic_id: string;
+  name: string;
+  file: string;
+  icon: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Question {
   id: string;
-  exam_id: string;
-  subject_id: string;
-  chapter_id: string;
-  topic_id?: string;
+  exam: string;
+  year: number | null;
+  topic: string;
+  subtopic: string;
+  topic_id: string;
+  subtopic_id: string;
+  question_number: number | null;
   question: string;
-  options: { [key: string]: string };
-  correct_answer: string;
-  explanation: string;
-  difficulty: 'easy' | 'medium' | 'hard';
-  year?: number;
-  marks: number;
-  negative_marks: number;
-  time_seconds: number;
+  options: string[]; // JSONB array
+  answer: string;
+  detailed_explanation: string | null;
+  difficulty: string | null;
+  subject: string;
+  tags: string[] | null; // JSONB array
+  time_estimate: number;
+  file_source: string | null;
+  created_at: string;
+  updated_at: string;
   question_type: string;
-  tags: string[];
-  verified: boolean;
-  active: boolean;
-  view_count: number;
-  attempt_count: number;
-  correct_count: number;
+  bookmarked?: boolean; // Added from user progress
+  attempted?: boolean; // Added from user progress
 }
 
-export interface QuestionFull extends Question {
-  exam_code: string;
-  exam_name: string;
-  subject_code: string;
-  subject_name: string;
-  chapter_code: string;
-  chapter_name: string;
-  topic_code?: string;
-  topic_name?: string;
-}
-
-export interface UserQuestionProgress {
+export interface UserProgress {
   id: string;
   user_id: string;
-  question_id: string;
-  bookmarked: boolean;
-  bookmarked_at?: string;
-  attempted: boolean;
-  attempt_count: number;
-  correct_count: number;
-  incorrect_count: number;
-  last_attempted_at?: string;
-  last_answer?: string;
-  last_correct?: boolean;
-  time_spent_seconds: number;
-  notes?: string;
+  topic_id: string;
+  listen_completed: boolean;
+  study_completed: boolean;
+  review_completed: boolean;
+  test_completed: boolean;
+  memory_completed: boolean;
+  test_score: number | null;
+  last_accessed: string | null;
 }
 
-export interface TestSession {
-  id: string;
-  user_id: string;
-  session_type: 'practice' | 'timed_test' | 'previous_year' | 'chapter_test';
-  exam_id?: string;
-  subject_id?: string;
-  chapter_id?: string;
-  year?: number;
-  total_questions: number;
-  total_marks: number;
-  time_limit_seconds?: number;
-  started_at: string;
-  completed_at?: string;
-  time_spent_seconds?: number;
-  status: 'in_progress' | 'completed' | 'abandoned';
-  score?: number;
-  correct_answers: number;
-  incorrect_answers: number;
-  skipped_answers: number;
-}
-
-export interface TestSessionAnswer {
-  id: string;
-  session_id: string;
-  question_id: string;
-  question_number: number;
-  user_answer?: string;
-  correct_answer: string;
-  is_correct?: boolean;
-  is_flagged: boolean;
-  time_spent_seconds: number;
-  answered_at?: string;
-}
-
-// Exam Operations
+// ExamBot Service
 export const examBotService = {
-  // Fetch all active exams
-  async getExams(): Promise<Exam[]> {
+  /**
+   * Get all active exam categories
+   */
+  async getExamCategories(): Promise<ExamCategory[]> {
     const { data, error } = await supabase
-      .from('exams')
+      .from('exam_categories')
       .select('*')
-      .eq('active', true)
+      .eq('is_active', true)
+      .order('category_name');
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  /**
+   * Get all topics
+   */
+  async getTopics(): Promise<Topic[]> {
+    const { data, error } = await supabase
+      .from('topics')
+      .select('*')
       .order('name');
 
     if (error) throw error;
     return data || [];
   },
 
-  // Fetch subjects for a specific exam
-  async getSubjects(examCode: string): Promise<Subject[]> {
+  /**
+   * Get subtopics for a specific topic
+   */
+  async getSubtopics(topicId: string): Promise<Subtopic[]> {
     const { data, error } = await supabase
-      .from('subjects')
+      .from('subtopics')
       .select('*')
-      .eq('exam_id', supabase.rpc('get_exam_id_by_code', { exam_code: examCode }))
-      .eq('active', true)
-      .order('display_order');
+      .eq('topic_id', topicId)
+      .order('name');
 
     if (error) throw error;
     return data || [];
   },
 
-  // Fetch subjects by exam ID
-  async getSubjectsByExamId(examId: string): Promise<Subject[]> {
-    const { data, error } = await supabase
-      .from('subjects')
-      .select('*')
-      .eq('exam_id', examId)
-      .eq('active', true)
-      .order('display_order');
-
-    if (error) throw error;
-    return data || [];
-  },
-
-  // Fetch chapters for a specific subject
-  async getChapters(subjectId: string): Promise<Chapter[]> {
-    const { data, error } = await supabase
-      .from('chapters')
-      .select('*')
-      .eq('subject_id', subjectId)
-      .eq('active', true)
-      .order('display_order');
-
-    if (error) throw error;
-    return data || [];
-  },
-
-  // Fetch topics for a specific chapter
-  async getTopics(chapterId: string): Promise<Topic[]> {
-    const { data, error } = await supabase
-      .from('topics')
-      .select('*')
-      .eq('chapter_id', chapterId)
-      .eq('active', true)
-      .order('display_order');
-
-    if (error) throw error;
-    return data || [];
-  },
-
-  // Fetch questions with filters
+  /**
+   * Get questions with filters
+   */
   async getQuestions(filters: {
-    examId?: string;
-    subjectId?: string;
-    chapterId?: string;
-    topicId?: string;
-    difficulty?: 'easy' | 'medium' | 'hard';
+    exam?: string;
     year?: number;
+    topic?: string;
+    subtopic?: string;
+    topicId?: string;
+    subtopicId?: string;
+    subject?: string;
+    difficulty?: string;
     limit?: number;
     offset?: number;
-  }): Promise<QuestionFull[]> {
-    let query = supabase
-      .from('vw_questions_full')
-      .select('*');
+  }): Promise<Question[]> {
+    let query = supabase.from('questions').select('*');
 
-    if (filters.examId) query = query.eq('exam_id', filters.examId);
-    if (filters.subjectId) query = query.eq('subject_id', filters.subjectId);
-    if (filters.chapterId) query = query.eq('chapter_id', filters.chapterId);
-    if (filters.topicId) query = query.eq('topic_id', filters.topicId);
-    if (filters.difficulty) query = query.eq('difficulty', filters.difficulty);
+    // Apply filters
+    if (filters.exam) query = query.eq('exam', filters.exam);
     if (filters.year) query = query.eq('year', filters.year);
+    if (filters.topic) query = query.eq('topic', filters.topic);
+    if (filters.subtopic) query = query.eq('subtopic', filters.subtopic);
+    if (filters.topicId) query = query.eq('topic_id', filters.topicId);
+    if (filters.subtopicId) query = query.eq('subtopic_id', filters.subtopicId);
+    if (filters.subject) query = query.eq('subject', filters.subject);
+    if (filters.difficulty) query = query.eq('difficulty', filters.difficulty);
 
+    // Pagination
     if (filters.limit) query = query.limit(filters.limit);
-    if (filters.offset) query = query.range(filters.offset, filters.offset + (filters.limit || 10) - 1);
+    if (filters.offset) {
+      query = query.range(
+        filters.offset,
+        filters.offset + (filters.limit || 10) - 1
+      );
+    }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
+    // Order by question number or created date
+    query = query.order('question_number', { ascending: true, nullsFirst: false });
+
+    const { data, error } = await query;
 
     if (error) throw error;
     return data || [];
   },
 
-  // Fetch previous year questions for a specific year
-  async getPreviousYearQuestions(examId: string, year: number, limit?: number): Promise<QuestionFull[]> {
+  /**
+   * Get previous year questions for a specific exam and year
+   */
+  async getPreviousYearQuestions(
+    exam: string,
+    year: number,
+    limit?: number
+  ): Promise<Question[]> {
     let query = supabase
-      .from('vw_questions_full')
+      .from('questions')
       .select('*')
-      .eq('exam_id', examId)
-      .eq('year', year);
+      .eq('exam', exam)
+      .eq('year', year)
+      .order('subject')
+      .order('question_number');
 
     if (limit) query = query.limit(limit);
 
-    const { data, error } = await query.order('subject_name');
+    const { data, error } = await query;
 
     if (error) throw error;
     return data || [];
   },
 
-  // Get available years for previous year papers
-  async getAvailableYears(examId: string): Promise<number[]> {
+  /**
+   * Get available years for an exam
+   */
+  async getAvailableYears(exam: string): Promise<number[]> {
     const { data, error } = await supabase
       .from('questions')
       .select('year')
-      .eq('exam_id', examId)
+      .eq('exam', exam)
       .not('year', 'is', null)
       .order('year', { ascending: false });
 
     if (error) throw error;
 
     // Extract unique years
-    const years = [...new Set(data?.map(q => q.year).filter(y => y !== null) || [])];
+    const years = [...new Set(data?.map((q) => q.year).filter((y) => y !== null))];
     return years as number[];
   },
 
-  // Increment view count for a question
-  async incrementViewCount(questionId: string): Promise<void> {
-    const { error } = await supabase.rpc('increment_view_count', { question_id: questionId });
-    if (error) throw error;
-  },
-
-  // User Progress Operations
-  async getUserProgress(userId: string, questionId: string): Promise<UserQuestionProgress | null> {
-    const { data, error } = await supabase
-      .from('user_question_progress')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('question_id', questionId)
-      .single();
-
-    if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "not found"
-    return data;
-  },
-
-  // Get all bookmarked questions for a user
-  async getBookmarkedQuestions(userId: string, examId?: string): Promise<QuestionFull[]> {
-    let query = supabase
-      .from('user_question_progress')
-      .select(`
-        question_id,
-        bookmarked_at,
-        vw_questions_full!inner (*)
-      `)
-      .eq('user_id', userId)
-      .eq('bookmarked', true);
-
-    if (examId) {
-      query = query.eq('vw_questions_full.exam_id', examId);
-    }
-
-    const { data, error } = await query.order('bookmarked_at', { ascending: false });
-
-    if (error) throw error;
-    return data?.map((item: any) => item.vw_questions_full) || [];
-  },
-
-  // Toggle bookmark for a question
-  async toggleBookmark(userId: string, questionId: string, bookmarked: boolean): Promise<void> {
-    const { error } = await supabase
-      .from('user_question_progress')
-      .upsert({
-        user_id: userId,
-        question_id: questionId,
-        bookmarked,
-        bookmarked_at: bookmarked ? new Date().toISOString() : null,
-      }, {
-        onConflict: 'user_id,question_id'
-      });
-
-    if (error) throw error;
-  },
-
-  // Record user answer
-  async recordAnswer(
-    userId: string,
-    questionId: string,
-    userAnswer: string,
-    correctAnswer: string,
-    timeSpent: number
-  ): Promise<void> {
-    const isCorrect = userAnswer === correctAnswer;
-
-    // Get existing progress
-    const existing = await this.getUserProgress(userId, questionId);
-
-    const updateData = {
-      user_id: userId,
-      question_id: questionId,
-      attempted: true,
-      attempt_count: (existing?.attempt_count || 0) + 1,
-      correct_count: (existing?.correct_count || 0) + (isCorrect ? 1 : 0),
-      incorrect_count: (existing?.incorrect_count || 0) + (isCorrect ? 0 : 1),
-      last_attempted_at: new Date().toISOString(),
-      last_answer: userAnswer,
-      last_correct: isCorrect,
-      time_spent_seconds: (existing?.time_spent_seconds || 0) + timeSpent,
-    };
-
-    const { error } = await supabase
-      .from('user_question_progress')
-      .upsert(updateData, { onConflict: 'user_id,question_id' });
-
-    if (error) throw error;
-
-    // Update question statistics
-    await supabase.rpc('update_question_stats', {
-      question_id: questionId,
-      is_correct: isCorrect
-    });
-  },
-
-  // Test Session Operations
-  async createTestSession(sessionData: Omit<TestSession, 'id' | 'created_at' | 'updated_at'>): Promise<string> {
-    const { data, error } = await supabase
-      .from('test_sessions')
-      .insert(sessionData)
-      .select('id')
-      .single();
-
-    if (error) throw error;
-    return data.id;
-  },
-
-  async updateTestSession(sessionId: string, updates: Partial<TestSession>): Promise<void> {
-    const { error } = await supabase
-      .from('test_sessions')
-      .update(updates)
-      .eq('id', sessionId);
-
-    if (error) throw error;
-  },
-
-  async getTestSession(sessionId: string): Promise<TestSession | null> {
-    const { data, error } = await supabase
-      .from('test_sessions')
-      .select('*')
-      .eq('id', sessionId)
-      .single();
-
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
-  },
-
-  async getUserTestSessions(userId: string, limit = 10): Promise<TestSession[]> {
-    const { data, error } = await supabase
-      .from('test_sessions')
-      .select('*')
-      .eq('user_id', userId)
-      .order('started_at', { ascending: false })
-      .limit(limit);
-
-    if (error) throw error;
-    return data || [];
-  },
-
-  async saveTestAnswer(answerData: Omit<TestSessionAnswer, 'id' | 'created_at'>): Promise<void> {
-    const { error } = await supabase
-      .from('test_session_answers')
-      .upsert(answerData, { onConflict: 'session_id,question_id' });
-
-    if (error) throw error;
-  },
-
-  async getTestAnswers(sessionId: string): Promise<TestSessionAnswer[]> {
-    const { data, error } = await supabase
-      .from('test_session_answers')
-      .select('*')
-      .eq('session_id', sessionId)
-      .order('question_number');
-
-    if (error) throw error;
-    return data || [];
-  },
-
-  // Statistics
-  async getUserStats(userId: string): Promise<{
-    total_questions_attempted: number;
-    bookmarked_questions: number;
-    total_correct: number;
-    total_incorrect: number;
-    accuracy_percentage: number;
-  }> {
-    const { data, error } = await supabase
-      .from('vw_user_stats')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-
-    if (error && error.code !== 'PGRST116') throw error;
-
-    return data || {
-      total_questions_attempted: 0,
-      bookmarked_questions: 0,
-      total_correct: 0,
-      total_incorrect: 0,
-      accuracy_percentage: 0,
-    };
-  },
-
+  /**
+   * Get question count with filters
+   */
   async getQuestionCount(filters: {
-    examId?: string;
-    subjectId?: string;
-    chapterId?: string;
-    difficulty?: string;
+    exam?: string;
     year?: number;
+    topicId?: string;
+    subtopicId?: string;
+    subject?: string;
+    difficulty?: string;
   }): Promise<number> {
     let query = supabase
       .from('questions')
-      .select('id', { count: 'exact', head: true })
-      .eq('active', true);
+      .select('id', { count: 'exact', head: true });
 
-    if (filters.examId) query = query.eq('exam_id', filters.examId);
-    if (filters.subjectId) query = query.eq('subject_id', filters.subjectId);
-    if (filters.chapterId) query = query.eq('chapter_id', filters.chapterId);
-    if (filters.difficulty) query = query.eq('difficulty', filters.difficulty);
+    if (filters.exam) query = query.eq('exam', filters.exam);
     if (filters.year) query = query.eq('year', filters.year);
+    if (filters.topicId) query = query.eq('topic_id', filters.topicId);
+    if (filters.subtopicId) query = query.eq('subtopic_id', filters.subtopicId);
+    if (filters.subject) query = query.eq('subject', filters.subject);
+    if (filters.difficulty) query = query.eq('difficulty', filters.difficulty);
 
     const { count, error } = await query;
 
     if (error) throw error;
     return count || 0;
   },
+
+  /**
+   * Get unique subjects for an exam
+   */
+  async getSubjectsByExam(exam: string): Promise<string[]> {
+    const { data, error } = await supabase
+      .from('questions')
+      .select('subject')
+      .eq('exam', exam)
+      .order('subject');
+
+    if (error) throw error;
+
+    // Get unique subjects
+    const subjects = [...new Set(data?.map((q) => q.subject))];
+    return subjects;
+  },
+
+  /**
+   * Get unique topics for an exam and subject
+   */
+  async getTopicsByExamAndSubject(
+    exam: string,
+    subject: string
+  ): Promise<{ topic: string; topic_id: string }[]> {
+    const { data, error } = await supabase
+      .from('questions')
+      .select('topic, topic_id')
+      .eq('exam', exam)
+      .eq('subject', subject)
+      .order('topic');
+
+    if (error) throw error;
+
+    // Get unique topics
+    const uniqueTopics = Array.from(
+      new Map(data?.map((item) => [item.topic_id, item])).values()
+    );
+
+    return uniqueTopics;
+  },
+
+  /**
+   * Get unique subtopics for a topic
+   */
+  async getSubtopicsByTopic(
+    topicId: string
+  ): Promise<{ subtopic: string; subtopic_id: string }[]> {
+    const { data, error } = await supabase
+      .from('questions')
+      .select('subtopic, subtopic_id')
+      .eq('topic_id', topicId)
+      .order('subtopic');
+
+    if (error) throw error;
+
+    // Get unique subtopics
+    const uniqueSubtopics = Array.from(
+      new Map(data?.map((item) => [item.subtopic_id, item])).values()
+    );
+
+    return uniqueSubtopics;
+  },
+
+  /**
+   * Search questions by keyword
+   */
+  async searchQuestions(
+    keyword: string,
+    exam?: string,
+    limit: number = 20
+  ): Promise<Question[]> {
+    let query = supabase
+      .from('questions')
+      .select('*')
+      .textSearch('question', keyword)
+      .limit(limit);
+
+    if (exam) query = query.eq('exam', exam);
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  /**
+   * Get random questions for practice
+   */
+  async getRandomQuestions(filters: {
+    exam: string;
+    subject?: string;
+    topicId?: string;
+    difficulty?: string;
+    count: number;
+  }): Promise<Question[]> {
+    // Note: Supabase doesn't have a built-in RANDOM() function in the client
+    // We'll fetch more questions and randomize on client side
+    const fetchCount = Math.min(filters.count * 3, 100); // Fetch 3x to randomize
+
+    let query = supabase
+      .from('questions')
+      .select('*')
+      .eq('exam', filters.exam)
+      .limit(fetchCount);
+
+    if (filters.subject) query = query.eq('subject', filters.subject);
+    if (filters.topicId) query = query.eq('topic_id', filters.topicId);
+    if (filters.difficulty) query = query.eq('difficulty', filters.difficulty);
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    // Randomize and take requested count
+    const shuffled = (data || []).sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, filters.count);
+  },
+
+  /**
+   * Get a single question by ID
+   */
+  async getQuestionById(questionId: string): Promise<Question | null> {
+    const { data, error } = await supabase
+      .from('questions')
+      .select('*')
+      .eq('id', questionId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  },
+
+  /**
+   * Get statistics for an exam
+   */
+  async getExamStats(exam: string): Promise<{
+    totalQuestions: number;
+    subjectCount: number;
+    topicCount: number;
+    yearRange: { min: number | null; max: number | null };
+  }> {
+    const { data, error } = await supabase
+      .from('questions')
+      .select('subject, topic_id, year')
+      .eq('exam', exam);
+
+    if (error) throw error;
+
+    const subjects = new Set(data?.map((q) => q.subject));
+    const topics = new Set(data?.map((q) => q.topic_id));
+    const years = data?.map((q) => q.year).filter((y) => y !== null) as number[];
+
+    return {
+      totalQuestions: data?.length || 0,
+      subjectCount: subjects.size,
+      topicCount: topics.size,
+      yearRange: {
+        min: years.length > 0 ? Math.min(...years) : null,
+        max: years.length > 0 ? Math.max(...years) : null,
+      },
+    };
+  },
 };
 
-// Helper function to get current user ID
-export const getCurrentUserId = (): string | null => {
-  return supabase.auth.getUser().then(({ data }) => data.user?.id || null).catch(() => null) as any;
+// Helper function to get current user
+export const getCurrentUser = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user;
 };
 
-// Database functions that need to be created in Supabase
-// These are SQL functions that should be added to your Supabase project:
+// Note: User progress tracking would need a separate table
+// For now, we can use localStorage for bookmarks or create a new table
+export const userProgressService = {
+  /**
+   * Get bookmarked question IDs from localStorage
+   */
+  getBookmarkedQuestions(): string[] {
+    const bookmarks = localStorage.getItem('exambot_bookmarks');
+    return bookmarks ? JSON.parse(bookmarks) : [];
+  },
 
-/*
--- Function to get exam ID by code
-CREATE OR REPLACE FUNCTION get_exam_id_by_code(exam_code TEXT)
-RETURNS UUID AS $$
-  SELECT id FROM exams WHERE code = exam_code LIMIT 1;
-$$ LANGUAGE SQL STABLE;
+  /**
+   * Toggle bookmark for a question
+   */
+  toggleBookmark(questionId: string): void {
+    const bookmarks = this.getBookmarkedQuestions();
+    const index = bookmarks.indexOf(questionId);
 
--- Function to increment view count
-CREATE OR REPLACE FUNCTION increment_view_count(question_id UUID)
-RETURNS VOID AS $$
-  UPDATE questions SET view_count = view_count + 1 WHERE id = question_id;
-$$ LANGUAGE SQL;
+    if (index > -1) {
+      bookmarks.splice(index, 1);
+    } else {
+      bookmarks.push(questionId);
+    }
 
--- Function to update question statistics
-CREATE OR REPLACE FUNCTION update_question_stats(question_id UUID, is_correct BOOLEAN)
-RETURNS VOID AS $$
-  UPDATE questions
-  SET
-    attempt_count = attempt_count + 1,
-    correct_count = correct_count + CASE WHEN is_correct THEN 1 ELSE 0 END
-  WHERE id = question_id;
-$$ LANGUAGE SQL;
-*/
+    localStorage.setItem('exambot_bookmarks', JSON.stringify(bookmarks));
+  },
+
+  /**
+   * Check if question is bookmarked
+   */
+  isBookmarked(questionId: string): boolean {
+    const bookmarks = this.getBookmarkedQuestions();
+    return bookmarks.includes(questionId);
+  },
+
+  /**
+   * Save test session to localStorage
+   */
+  saveTestSession(sessionId: string, sessionData: any): void {
+    localStorage.setItem(`test_session_${sessionId}`, JSON.stringify(sessionData));
+  },
+
+  /**
+   * Get test session from localStorage
+   */
+  getTestSession(sessionId: string): any {
+    const session = localStorage.getItem(`test_session_${sessionId}`);
+    return session ? JSON.parse(session) : null;
+  },
+
+  /**
+   * Clear test session
+   */
+  clearTestSession(sessionId: string): void {
+    localStorage.removeItem(`test_session_${sessionId}`);
+  },
+};
