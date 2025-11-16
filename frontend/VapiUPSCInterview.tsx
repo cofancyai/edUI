@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Mic, MicOff, Phone, PhoneOff, Volume2, VolumeX, AlertCircle, Loader } from 'lucide-react';
-import { supabase } from '../utils/supabaseClient';
+import { supabase } from './utils/supabaseClient';
 import Vapi from '@vapi-ai/web';
 
 interface VapiUPSCInterviewProps {

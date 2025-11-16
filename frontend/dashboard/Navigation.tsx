@@ -14,8 +14,8 @@ import {
   Newspaper,
   Search
 } from 'lucide-react';
-import { supabase } from '../../utils/supabaseClient';
-import { getCredential } from '../../utils/supabaseClient';
+import { supabase } from '../utils/supabaseClient';
+import { getCredential } from '../utils/supabaseClient';
 
 interface NavigationProps {
   selectedMenu: string | null;

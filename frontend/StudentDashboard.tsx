@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Bell, Settings, User, LogOut, Activity, Zap, AlertTriangle, RefreshCw, Play, Trash2, RotateCcw, BarChart3 } from 'lucide-react';
-import { supabase } from '../utils/supabaseClient';
-import { useApiAvailability } from '../hooks/useApiAvailability';
-import { useMockTest } from '../hooks/useMockTest';
+import { supabase } from './utils/supabaseClient';
+import { useApiAvailability } from './hooks/useApiAvailability';
+import { useMockTest } from './hooks/useMockTest';
 import AITutor from './dashboard/AITutor';
 import ExamAlert from './dashboard/ExamAlert';
 import EditProfile from './dashboard/EditProfile';
@@ -17,7 +17,7 @@ import AnswerEvaluation from './dashboard/AnswerEvaluation';
 import CurrentAffairs from './dashboard/CurrentAffairs';
 import './dashboard/MenuBar.css';
 import VapiUPSCInterview from './VapiUPSCInterview';
-import { SUPPORTED_LANGUAGES } from '../constants/languages';
+import { SUPPORTED_LANGUAGES } from './constants/languages';
 
 // Load Google Fonts for Montserrat
 const montserratLink = document.createElement('link');
