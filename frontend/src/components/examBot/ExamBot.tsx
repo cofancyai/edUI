@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import LoadingIndicator from '../LoadingIndicator';
 import ErrorMessage from '../ErrorMessage';
-import { examBotService, Question, ExamCategory, Topic, Subtopic } from '../../services/examBotService';
+import { examBotService, supabase, Question, ExamCategory, Topic, Subtopic } from '../../services/examBotService';
 
 interface ExamBotProps {
   selectedLanguage?: string;
@@ -102,7 +102,7 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
       const allExams = await examBotService.getExamCategories();
 
       // Get unique exams that have questions
-      const { data: questionsData } = await examBotService.supabase
+      const { data: questionsData } = await supabase
         .from('questions')
         .select('exam');
 
