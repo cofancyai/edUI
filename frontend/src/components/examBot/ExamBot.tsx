@@ -98,9 +98,22 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
       setLoading(true);
       setError(null);
 
-      // Load exam categories
-      const exams = await examBotService.getExamCategories();
-      setExamCategories(exams);
+      // Get all exam categories from database
+      const allExams = await examBotService.getExamCategories();
+
+      // Get unique exams that have questions
+      const { data: questionsData } = await examBotService.supabase
+        .from('questions')
+        .select('exam');
+
+      const examsWithQuestions = [...new Set(questionsData?.map(q => q.exam))];
+
+      // Filter to only show exams that have questions
+      const filteredExams = allExams.filter(exam =>
+        examsWithQuestions.includes(exam.category_name)
+      );
+
+      setExamCategories(filteredExams);
 
       // Load all topics (for reference)
       const allTopics = await examBotService.getTopics();
