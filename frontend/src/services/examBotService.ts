@@ -208,6 +208,31 @@ export const examBotService = {
   },
 
   /**
+   * Get available years for an exam and subject
+   */
+  async getAvailableYearsByExamAndSubject(exam: string, subject: string): Promise<number[]> {
+    let query = supabase
+      .from('questions')
+      .select('year')
+      .eq('exam', exam)
+      .not('year', 'is', null)
+      .order('year', { ascending: false });
+
+    // Only filter by subject if provided
+    if (subject) {
+      query = query.eq('subject', subject);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    // Extract unique years
+    const years = [...new Set(data?.map((q) => q.year).filter((y) => y !== null))];
+    return years as number[];
+  },
+
+  /**
    * Get question count with filters
    */
   async getQuestionCount(filters: {

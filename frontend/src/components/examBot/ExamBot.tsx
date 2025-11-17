@@ -133,6 +133,15 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
     }
   }, [filters.exam]);
 
+  // Update years when subject changes
+  useEffect(() => {
+    if (filters.exam && filters.subject) {
+      loadYearsForSubject(filters.exam, filters.subject);
+    } else if (filters.exam && !filters.subject) {
+      loadYearsForExam(filters.exam);
+    }
+  }, [filters.subject]);
+
   // Update subtopics when topic changes
   useEffect(() => {
     if (filters.topic) {
@@ -185,6 +194,24 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
     }
   };
 
+  const loadYearsForExam = async (exam: string) => {
+    try {
+      const years = await examBotService.getAvailableYears(exam);
+      setAvailableYears(years);
+    } catch (err: any) {
+      console.error('Error loading years for exam:', err);
+    }
+  };
+
+  const loadYearsForSubject = async (exam: string, subject: string) => {
+    try {
+      const years = await examBotService.getAvailableYearsByExamAndSubject(exam, subject);
+      setAvailableYears(years);
+    } catch (err: any) {
+      console.error('Error loading years for subject:', err);
+    }
+  };
+
   const loadQuestions = async () => {
     try {
       setLoading(true);
@@ -218,6 +245,9 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
         newFilters.topic = '';
         newFilters.subtopic = '';
         newFilters.subject = '';
+        newFilters.year = null;
+      } else if (key === 'subject') {
+        // Reset year when subject changes since available years may be different
         newFilters.year = null;
       } else if (key === 'topic') {
         newFilters.subtopic = '';
