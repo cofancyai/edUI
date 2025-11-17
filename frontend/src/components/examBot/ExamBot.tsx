@@ -428,11 +428,11 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           {/* Exam Filter */}
           <div>
-            <label className="block text-sm text-gray-300 mb-2">Exam</label>
+            <label style={{display: "block", fontSize: "0.875rem", color: "#D1D5DB", marginBottom: "0.5rem"}}>Exam</label>
             <select
               value={filters.exam}
               onChange={(e) => handleFilterChange('exam', e.target.value)}
-              className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+              style={{width: "100%", padding: "0.5rem 1rem", borderRadius: "0.5rem", outline: "none"}}
               style={{
                 background: 'rgba(255, 255, 255, 0.1)',
                 border: '1px solid rgba(255, 215, 0, 0.3)',
@@ -452,11 +452,11 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
           {/* Subject Filter */}
           {filters.exam && (
             <div>
-              <label className="block text-sm text-gray-300 mb-2">Subject</label>
+              <label style={{display: "block", fontSize: "0.875rem", color: "#D1D5DB", marginBottom: "0.5rem"}}>Subject</label>
               <select
                 value={filters.subject}
                 onChange={(e) => handleFilterChange('subject', e.target.value)}
-                className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+                style={{width: "100%", padding: "0.5rem 1rem", borderRadius: "0.5rem", outline: "none"}}
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   border: '1px solid rgba(255, 215, 0, 0.3)',
@@ -476,11 +476,11 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
           {/* Topic Filter */}
           {filters.exam && (
             <div>
-              <label className="block text-sm text-gray-300 mb-2">Topic</label>
+              <label style={{display: "block", fontSize: "0.875rem", color: "#D1D5DB", marginBottom: "0.5rem"}}>Topic</label>
               <select
                 value={filters.topic}
                 onChange={(e) => handleFilterChange('topic', e.target.value)}
-                className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+                style={{width: "100%", padding: "0.5rem 1rem", borderRadius: "0.5rem", outline: "none"}}
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   border: '1px solid rgba(255, 215, 0, 0.3)',
@@ -500,11 +500,11 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
           {/* Subtopic Filter */}
           {filters.topic && (
             <div>
-              <label className="block text-sm text-gray-300 mb-2">Subtopic</label>
+              <label style={{display: "block", fontSize: "0.875rem", color: "#D1D5DB", marginBottom: "0.5rem"}}>Subtopic</label>
               <select
                 value={filters.subtopic}
                 onChange={(e) => handleFilterChange('subtopic', e.target.value)}
-                className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+                style={{width: "100%", padding: "0.5rem 1rem", borderRadius: "0.5rem", outline: "none"}}
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   border: '1px solid rgba(255, 215, 0, 0.3)',
@@ -524,11 +524,11 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
           {/* Year Filter */}
           {filters.exam && availableYears.length > 0 && (
             <div>
-              <label className="block text-sm text-gray-300 mb-2">Year</label>
+              <label style={{display: "block", fontSize: "0.875rem", color: "#D1D5DB", marginBottom: "0.5rem"}}>Year</label>
               <select
                 value={filters.year || ''}
                 onChange={(e) => handleFilterChange('year', e.target.value ? Number(e.target.value) : null)}
-                className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+                style={{width: "100%", padding: "0.5rem 1rem", borderRadius: "0.5rem", outline: "none"}}
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   border: '1px solid rgba(255, 215, 0, 0.3)',
@@ -547,11 +547,11 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
 
           {/* Difficulty Filter */}
           <div>
-            <label className="block text-sm text-gray-300 mb-2">Difficulty</label>
+            <label style={{display: "block", fontSize: "0.875rem", color: "#D1D5DB", marginBottom: "0.5rem"}}>Difficulty</label>
             <select
               value={filters.difficulty}
               onChange={(e) => handleFilterChange('difficulty', e.target.value)}
-              className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+              style={{width: "100%", padding: "0.5rem 1rem", borderRadius: "0.5rem", outline: "none"}}
               style={{
                 background: 'rgba(255, 255, 255, 0.1)',
                 border: '1px solid rgba(255, 215, 0, 0.3)',
@@ -567,11 +567,11 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-6 flex gap-4">
+        <div style={{marginTop: "1.5rem", display: "flex", gap: "1rem"}}>
           <button
             onClick={startPracticeMode}
             disabled={!filters.exam || loading}
-            className="flex-1 px-6 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+            style={{flex: 1, padding: "0.75rem 1.5rem", borderRadius: "0.5rem", fontWeight: 600, transition: "all 0.3s", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", cursor: "pointer", border: "none"}}
             style={{
               background: filters.exam && !loading
                 ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
@@ -595,7 +595,7 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
                 difficulty: ''
               });
             }}
-            className="px-6 py-3 rounded-lg font-semibold transition-all"
+            style={{padding: "0.75rem 1.5rem", borderRadius: "0.5rem", fontWeight: 600, transition: "all 0.3s", cursor: "pointer", border: "none"}}
             style={{
               background: 'rgba(255, 255, 255, 0.1)',
               border: '1px solid rgba(255, 215, 0, 0.3)',
