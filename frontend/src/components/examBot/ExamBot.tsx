@@ -1413,121 +1413,251 @@ const ExamBot: React.FC<ExamBotProps> = () => {
   const renderResults = () => {
     if (!testResults) return null;
 
+    const scorePercentage = parseFloat(testResults.accuracy);
+    const performanceMessage = scorePercentage >= 80 ? '🎉 Excellent!' : scorePercentage >= 60 ? '👍 Good Job!' : scorePercentage >= 40 ? '📈 Keep Practicing!' : '💪 Don\'t Give Up!';
+
     return (
-      <div className="space-y-6">
-        {/* Results Header */}
+      <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+        {/* Results Header with Circular Progress */}
         <div
-          className="p-8 rounded-2xl text-center"
           style={{
+            padding: '3rem 2rem',
+            borderRadius: '1.5rem',
             background: 'linear-gradient(135deg, rgba(30, 26, 71, 0.95) 0%, rgba(46, 26, 71, 0.95) 100%)',
-            border: '1px solid rgba(255, 215, 0, 0.3)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+            border: '2px solid rgba(255, 215, 0, 0.3)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+            textAlign: 'center',
+            marginBottom: '2rem'
           }}
         >
-          <Trophy size={64} color="#FFD700" className="mx-auto mb-4" />
-          <h2 className="text-3xl font-bold mb-2" style={{ color: '#FFD700' }}>
+          <Trophy size={80} color="#FFD700" style={{ margin: '0 auto 1.5rem' }} />
+          <h2 style={{ color: '#FFD700', fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
             Test Completed!
           </h2>
-          <p className="text-gray-300 text-lg">
-            Here's how you performed
+          <p style={{ color: '#D1D5DB', fontSize: '1.25rem', marginBottom: '2rem' }}>
+            {performanceMessage}
           </p>
-        </div>
 
-        {/* Score Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div
-            className="p-6 rounded-xl text-center"
-            style={{
-              background: 'rgba(16, 185, 129, 0.2)',
-              border: '1px solid rgba(16, 185, 129, 0.3)'
-            }}
-          >
-            <CheckCircle size={32} color="#10B981" className="mx-auto mb-2" />
-            <p className="text-3xl font-bold text-green-400">{testResults.correct}</p>
-            <p className="text-gray-300 text-sm">Correct</p>
-          </div>
-
-          <div
-            className="p-6 rounded-xl text-center"
-            style={{
-              background: 'rgba(239, 68, 68, 0.2)',
-              border: '1px solid rgba(239, 68, 68, 0.3)'
-            }}
-          >
-            <XCircle size={32} color="#EF4444" className="mx-auto mb-2" />
-            <p className="text-3xl font-bold text-red-400">{testResults.incorrect}</p>
-            <p className="text-gray-300 text-sm">Incorrect</p>
-          </div>
-
-          <div
-            className="p-6 rounded-xl text-center"
-            style={{
-              background: 'rgba(156, 163, 175, 0.2)',
-              border: '1px solid rgba(156, 163, 175, 0.3)'
-            }}
-          >
-            <Clock size={32} color="#9CA3AF" className="mx-auto mb-2" />
-            <p className="text-3xl font-bold text-gray-400">{testResults.skipped}</p>
-            <p className="text-gray-300 text-sm">Skipped</p>
-          </div>
-
-          <div
-            className="p-6 rounded-xl text-center"
-            style={{
-              background: 'rgba(255, 215, 0, 0.2)',
-              border: '1px solid rgba(255, 215, 0, 0.3)'
-            }}
-          >
-            <TrendingUp size={32} color="#FFD700" className="mx-auto mb-2" />
-            <p className="text-3xl font-bold" style={{ color: '#FFD700' }}>{testResults.accuracy}%</p>
-            <p className="text-gray-300 text-sm">Accuracy</p>
+          {/* Large Accuracy Display */}
+          <div style={{
+            width: '200px',
+            height: '200px',
+            margin: '0 auto',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 165, 0, 0.2) 100%)',
+            border: '4px solid #FFD700',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 0 40px rgba(255, 215, 0, 0.4)'
+          }}>
+            <div style={{ fontSize: '3.5rem', fontWeight: 'bold', color: '#FFD700', lineHeight: 1 }}>
+              {testResults.accuracy}%
+            </div>
+            <div style={{ fontSize: '0.875rem', color: '#D1D5DB', marginTop: '0.5rem' }}>
+              Accuracy
+            </div>
           </div>
         </div>
 
-        {/* Additional Stats */}
-        <div
-          style={{
-            padding: "1.5rem",
-            borderRadius: "0.75rem",
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}
-        >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div>
-              <p className="text-gray-400 text-sm">Total Questions</p>
-              <p className="text-2xl font-bold text-white">{testResults.total}</p>
+        {/* Score Cards - Non-grid Layout */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+          {/* Correct Answers */}
+          <div style={{
+            padding: '1.5rem 2rem',
+            borderRadius: '1rem',
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%)',
+            border: '2px solid rgba(16, 185, 129, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+              <div style={{
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                background: 'rgba(16, 185, 129, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <CheckCircle size={36} color="#10B981" />
+              </div>
+              <div>
+                <p style={{ color: '#D1D5DB', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Correct Answers</p>
+                <p style={{ color: '#10B981', fontSize: '2rem', fontWeight: 'bold' }}>{testResults.correct}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-400 text-sm">Time Spent</p>
-              <p className="text-2xl font-bold text-white">{formatTime(testResults.timeSpent)}</p>
+            <div style={{
+              padding: '0.5rem 1.5rem',
+              borderRadius: '9999px',
+              background: 'rgba(16, 185, 129, 0.3)',
+              color: '#10B981',
+              fontSize: '1.125rem',
+              fontWeight: '600'
+            }}>
+              {testResults.total > 0 ? Math.round((testResults.correct / testResults.total) * 100) : 0}%
             </div>
-            <div>
-              <p className="text-gray-400 text-sm">Avg. Time/Q</p>
-              <p className="text-2xl font-bold text-white">
-                {formatTime(Math.floor(testResults.timeSpent / testResults.total))}
-              </p>
+          </div>
+
+          {/* Incorrect Answers */}
+          <div style={{
+            padding: '1.5rem 2rem',
+            borderRadius: '1rem',
+            background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.15) 100%)',
+            border: '2px solid rgba(239, 68, 68, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+              <div style={{
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                background: 'rgba(239, 68, 68, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <XCircle size={36} color="#EF4444" />
+              </div>
+              <div>
+                <p style={{ color: '#D1D5DB', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Incorrect Answers</p>
+                <p style={{ color: '#EF4444', fontSize: '2rem', fontWeight: 'bold' }}>{testResults.incorrect}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-400 text-sm">Score</p>
-              <p className="text-2xl font-bold" style={{ color: '#FFD700' }}>
+            <div style={{
+              padding: '0.5rem 1.5rem',
+              borderRadius: '9999px',
+              background: 'rgba(239, 68, 68, 0.3)',
+              color: '#EF4444',
+              fontSize: '1.125rem',
+              fontWeight: '600'
+            }}>
+              {testResults.total > 0 ? Math.round((testResults.incorrect / testResults.total) * 100) : 0}%
+            </div>
+          </div>
+
+          {/* Skipped Questions */}
+          {testResults.skipped > 0 && (
+            <div style={{
+              padding: '1.5rem 2rem',
+              borderRadius: '1rem',
+              background: 'linear-gradient(135deg, rgba(156, 163, 175, 0.15) 0%, rgba(107, 114, 128, 0.15) 100%)',
+              border: '2px solid rgba(156, 163, 175, 0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '50%',
+                  background: 'rgba(156, 163, 175, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Clock size={36} color="#9CA3AF" />
+                </div>
+                <div>
+                  <p style={{ color: '#D1D5DB', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Skipped Questions</p>
+                  <p style={{ color: '#9CA3AF', fontSize: '2rem', fontWeight: 'bold' }}>{testResults.skipped}</p>
+                </div>
+              </div>
+              <div style={{
+                padding: '0.5rem 1.5rem',
+                borderRadius: '9999px',
+                background: 'rgba(156, 163, 175, 0.3)',
+                color: '#9CA3AF',
+                fontSize: '1.125rem',
+                fontWeight: '600'
+              }}>
+                {testResults.total > 0 ? Math.round((testResults.skipped / testResults.total) * 100) : 0}%
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Quick Stats */}
+        <div style={{
+          padding: '2rem',
+          borderRadius: '1rem',
+          background: 'rgba(255, 255, 255, 0.05)',
+          border: '1px solid rgba(255, 215, 0, 0.2)',
+          marginBottom: '2rem'
+        }}>
+          <h3 style={{ color: '#FFD700', fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem' }}>
+            Session Details
+          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '2rem' }}>
+            <div style={{ textAlign: 'center' }}>
+              <BookOpen size={32} color="#FFD700" style={{ margin: '0 auto 0.75rem' }} />
+              <p style={{ color: '#D1D5DB', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Total Questions</p>
+              <p style={{ color: 'white', fontSize: '1.75rem', fontWeight: 'bold' }}>{testResults.total}</p>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <Trophy size={32} color="#FFD700" style={{ margin: '0 auto 0.75rem' }} />
+              <p style={{ color: '#D1D5DB', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Your Score</p>
+              <p style={{ color: '#FFD700', fontSize: '1.75rem', fontWeight: 'bold' }}>
                 {testResults.correct}/{testResults.total}
               </p>
             </div>
+            {testResults.timeSpent > 0 && (
+              <>
+                <div style={{ textAlign: 'center' }}>
+                  <Clock size={32} color="#FFD700" style={{ margin: '0 auto 0.75rem' }} />
+                  <p style={{ color: '#D1D5DB', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Time Spent</p>
+                  <p style={{ color: 'white', fontSize: '1.75rem', fontWeight: 'bold' }}>{formatTime(testResults.timeSpent)}</p>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <TrendingUp size={32} color="#FFD700" style={{ margin: '0 auto 0.75rem' }} />
+                  <p style={{ color: '#D1D5DB', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Avg Time/Q</p>
+                  <p style={{ color: 'white', fontSize: '1.75rem', fontWeight: 'bold' }}>
+                    {formatTime(Math.floor(testResults.timeSpent / testResults.total))}
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-4">
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <button
             onClick={() => setViewMode('review')}
-            className="flex-1 px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
             style={{
+              flex: 1,
+              minWidth: '200px',
+              padding: '1.25rem 2rem',
+              borderRadius: '0.75rem',
+              border: 'none',
               background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
-              color: '#1a1a4e'
+              color: '#1a1a4e',
+              fontSize: '1.125rem',
+              fontWeight: '700',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.75rem',
+              boxShadow: '0 4px 16px rgba(255, 215, 0, 0.4)',
+              transition: 'all 0.3s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 215, 0, 0.5)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 215, 0, 0.4)';
             }}
           >
-            <Eye size={20} />
+            <Eye size={24} />
             Review Answers
           </button>
 
@@ -1535,17 +1665,38 @@ const ExamBot: React.FC<ExamBotProps> = () => {
             onClick={() => {
               setTestSession(null);
               setTestResults(null);
+              setAttemptedQuestions(new Set());
+              setPracticeAnswers(new Map());
               setViewMode('selectFilters');
             }}
-            className="flex-1 px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
             style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 215, 0, 0.3)',
-              color: 'white'
+              flex: 1,
+              minWidth: '200px',
+              padding: '1.25rem 2rem',
+              borderRadius: '0.75rem',
+              border: '2px solid rgba(255, 215, 0, 0.3)',
+              background: 'rgba(255, 255, 255, 0.05)',
+              color: 'white',
+              fontSize: '1.125rem',
+              fontWeight: '700',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.75rem',
+              transition: 'all 0.3s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.5)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+              e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.3)';
             }}
           >
-            <RotateCcw size={20} />
-            New Test
+            <RotateCcw size={24} />
+            New Practice
           </button>
         </div>
       </div>
