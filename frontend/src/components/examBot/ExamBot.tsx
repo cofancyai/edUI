@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import LoadingIndicator from '../LoadingIndicator';
 import ErrorMessage from '../ErrorMessage';
-import { examBotService, Question, ExamCategory, Topic, Subtopic } from '../../services/examBotService_updated';
+import { examBotService, Question, ExamCategory, Topic, Subtopic } from '../../services/examBotService';
 
 interface ExamBotProps {
   selectedLanguage?: string;
