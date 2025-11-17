@@ -70,6 +70,7 @@ const ExamBot: React.FC<ExamBotProps> = () => {
   // Track attempted questions in practice mode
   const [attemptedQuestions, setAttemptedQuestions] = useState<Set<number>>(new Set());
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [practiceAnswers, setPracticeAnswers] = useState<Map<number, string>>(new Map());
 
   // Load initial data
   useEffect(() => {
@@ -231,7 +232,44 @@ const ExamBot: React.FC<ExamBotProps> = () => {
     setCurrentQuestionIndex(0);
     setAttemptedQuestions(new Set());
     setSelectedAnswer(null);
+    setPracticeAnswers(new Map());
     setViewMode('practice');
+  };
+
+  const submitPracticeTest = () => {
+    // Calculate results
+    let correct = 0;
+    let incorrect = 0;
+    let skipped = questions.length - attemptedQuestions.size;
+
+    questions.forEach((q, index) => {
+      const userAns = practiceAnswers.get(index);
+      if (userAns) {
+        if (userAns === q.answer) {
+          correct++;
+        } else {
+          incorrect++;
+        }
+      }
+    });
+
+    // Create results object with practice answers
+    const results = {
+      correct,
+      incorrect,
+      skipped,
+      total: questions.length,
+      timeSpent: 0, // Practice mode doesn't track time
+      accuracy: questions.length > 0 ? ((correct / questions.length) * 100).toFixed(1) : '0',
+      questions: questions,
+      userAnswers: new Map(Array.from(practiceAnswers.entries()).map(([index, answer]) => [
+        questions[index].id,
+        { questionId: questions[index].id, answer, timeSpent: 0, flagged: false }
+      ]))
+    };
+
+    setTestResults(results);
+    setViewMode('results');
   };
 
   // startTest function removed - test mode available in test view
@@ -748,12 +786,15 @@ const ExamBot: React.FC<ExamBotProps> = () => {
     const handleOptionSelect = (optionIndex: string) => {
       setSelectedAnswer(optionIndex);
       setAttemptedQuestions(prev => new Set(prev).add(currentQuestionIndex));
+      setPracticeAnswers(prev => new Map(prev).set(currentQuestionIndex, optionIndex));
     };
 
     // Navigate to specific question
     const goToQuestion = (index: number) => {
       setCurrentQuestionIndex(index);
-      setSelectedAnswer(null);
+      // Restore previously selected answer if exists
+      const previousAnswer = practiceAnswers.get(index);
+      setSelectedAnswer(previousAnswer || null);
     };
 
     // Calculate stats
@@ -872,13 +913,14 @@ const ExamBot: React.FC<ExamBotProps> = () => {
         {/* Right Side: Question Display */}
         <div style={{ flex: 1 }}>
           {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <button
               onClick={() => {
                 setViewMode('selectFilters');
                 setCurrentQuestionIndex(0);
                 setAttemptedQuestions(new Set());
                 setSelectedAnswer(null);
+                setPracticeAnswers(new Map());
               }}
               style={{
                 padding: '0.75rem 1.5rem',
@@ -900,22 +942,47 @@ const ExamBot: React.FC<ExamBotProps> = () => {
               Question {currentQuestionIndex + 1} of {questions.length}
             </h2>
 
-            <button
-              onClick={() => toggleBookmark(currentQuestion.id)}
-              style={{
-                padding: '0.75rem',
-                borderRadius: '0.5rem',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                cursor: 'pointer'
-              }}
-            >
-              <Bookmark
-                size={24}
-                color={currentQuestion.bookmarked ? '#FFD700' : '#666'}
-                fill={currentQuestion.bookmarked ? '#FFD700' : 'none'}
-              />
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              <button
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to end this practice session? Your progress will be saved and you can review your answers.')) {
+                    submitPracticeTest();
+                  }
+                }}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '0.5rem',
+                  background: 'rgba(239, 68, 68, 0.2)',
+                  border: '1px solid rgba(239, 68, 68, 0.5)',
+                  color: '#EF4444',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontWeight: '600'
+                }}
+              >
+                <XCircle size={20} />
+                End Test
+              </button>
+
+              <button
+                onClick={() => toggleBookmark(currentQuestion.id)}
+                style={{
+                  padding: '0.75rem',
+                  borderRadius: '0.5rem',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  cursor: 'pointer'
+                }}
+              >
+                <Bookmark
+                  size={24}
+                  color={currentQuestion.bookmarked ? '#FFD700' : '#666'}
+                  fill={currentQuestion.bookmarked ? '#FFD700' : 'none'}
+                />
+              </button>
+            </div>
           </div>
 
           {/* Question Card */}
@@ -1056,21 +1123,7 @@ const ExamBot: React.FC<ExamBotProps> = () => {
           {attemptedQuestions.size === questions.length && (
             <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
               <button
-                onClick={() => {
-                  const completionMessage = `Practice Session Complete!\n\n` +
-                    `📊 Summary:\n` +
-                    `• Total Questions: ${questions.length}\n` +
-                    `• Attempted: ${attemptedQuestions.size}\n` +
-                    `• Completion: 100%\n\n` +
-                    `Great job! You've reviewed all questions.`;
-
-                  if (window.confirm(completionMessage + '\n\nWould you like to return to filter selection?')) {
-                    setViewMode('selectFilters');
-                    setCurrentQuestionIndex(0);
-                    setAttemptedQuestions(new Set());
-                    setSelectedAnswer(null);
-                  }
-                }}
+                onClick={submitPracticeTest}
                 style={{
                   padding: '1rem 3rem',
                   borderRadius: '0.75rem',
@@ -1109,8 +1162,11 @@ const ExamBot: React.FC<ExamBotProps> = () => {
             <button
               onClick={() => {
                 if (currentQuestionIndex > 0) {
-                  setCurrentQuestionIndex(currentQuestionIndex - 1);
-                  setSelectedAnswer(null);
+                  const newIndex = currentQuestionIndex - 1;
+                  setCurrentQuestionIndex(newIndex);
+                  // Restore previously selected answer if exists
+                  const previousAnswer = practiceAnswers.get(newIndex);
+                  setSelectedAnswer(previousAnswer || null);
                 }
               }}
               disabled={currentQuestionIndex === 0}
@@ -1141,8 +1197,11 @@ const ExamBot: React.FC<ExamBotProps> = () => {
             <button
               onClick={() => {
                 if (currentQuestionIndex < questions.length - 1) {
-                  setCurrentQuestionIndex(currentQuestionIndex + 1);
-                  setSelectedAnswer(null);
+                  const newIndex = currentQuestionIndex + 1;
+                  setCurrentQuestionIndex(newIndex);
+                  // Restore previously selected answer if exists
+                  const previousAnswer = practiceAnswers.get(newIndex);
+                  setSelectedAnswer(previousAnswer || null);
                 }
               }}
               disabled={currentQuestionIndex === questions.length - 1}
