@@ -1707,119 +1707,305 @@ const ExamBot: React.FC<ExamBotProps> = () => {
     if (!testResults) return null;
 
     return (
-      <div className="space-y-6">
+      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
           <button
             onClick={() => setViewMode('results')}
-            className="px-4 py-2 rounded-lg flex items-center gap-2"
             style={{
+              padding: '0.75rem 1.5rem',
+              borderRadius: '0.75rem',
               background: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 215, 0, 0.3)',
-              color: 'white'
+              border: '2px solid rgba(255, 215, 0, 0.3)',
+              color: 'white',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              transition: 'all 0.3s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+              e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.5)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.3)';
             }}
           >
             <ChevronLeft size={20} />
             Back to Results
           </button>
 
-          <h2 className="text-2xl font-bold" style={{ color: '#FFD700' }}>
+          <h2 style={{ color: '#FFD700', fontSize: '2rem', fontWeight: 'bold', textAlign: 'center' }}>
             Review Answers
           </h2>
 
-          <div className="w-32" /> {/* Spacer */}
+          <div style={{ width: '140px' }} /> {/* Spacer for alignment */}
         </div>
 
         {/* Questions Review */}
-        <div className="space-y-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {testResults.questions.map((question: Question, index: number) => {
             const userAnswer = testResults.userAnswers.get(question.id);
             const isCorrect = userAnswer?.answer === question.answer;
             const isSkipped = !userAnswer || !userAnswer.answer;
 
+            // Determine border and background gradients based on status
+            const borderColor = isCorrect
+              ? '2px solid rgba(16, 185, 129, 0.5)'
+              : isSkipped
+              ? '2px solid rgba(156, 163, 175, 0.4)'
+              : '2px solid rgba(239, 68, 68, 0.5)';
+
+            const bgGradient = isCorrect
+              ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%)'
+              : isSkipped
+              ? 'linear-gradient(135deg, rgba(156, 163, 175, 0.08) 0%, rgba(107, 114, 128, 0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.08) 100%)';
+
             return (
               <div
                 key={question.id}
                 style={{
-                  padding: "1.5rem",
-                  borderRadius: "0.75rem",
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid ' + (isCorrect ? 'rgba(16, 185, 129, 0.3)' : isSkipped ? 'rgba(156, 163, 175, 0.3)' : 'rgba(239, 68, 68, 0.3)')
+                  padding: '2rem',
+                  borderRadius: '1.25rem',
+                  background: bgGradient,
+                  border: borderColor,
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)'
                 }}
               >
-                {/* Question Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-400">Q{index + 1}</span>
-                    {isCorrect ? (
-                      <CheckCircle size={20} color="#10B981" />
-                    ) : isSkipped ? (
-                      <Clock size={20} color="#9CA3AF" />
-                    ) : (
-                      <XCircle size={20} color="#EF4444" />
-                    )}
-                    <span className={`text-sm font-semibold ${
-                      isCorrect ? 'text-green-400' : isSkipped ? 'text-gray-400' : 'text-red-400'
-                    }`}>
-                      {isCorrect ? 'Correct' : isSkipped ? 'Skipped' : 'Incorrect'}
-                    </span>
+                {/* Question Header with Status Badge */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    {/* Circular Status Icon */}
+                    <div style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '50%',
+                      background: isCorrect
+                        ? 'rgba(16, 185, 129, 0.3)'
+                        : isSkipped
+                        ? 'rgba(156, 163, 175, 0.3)'
+                        : 'rgba(239, 68, 68, 0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      {isCorrect ? (
+                        <CheckCircle size={28} color="#10B981" />
+                      ) : isSkipped ? (
+                        <Clock size={28} color="#9CA3AF" />
+                      ) : (
+                        <XCircle size={28} color="#EF4444" />
+                      )}
+                    </div>
+
+                    <div>
+                      <div style={{
+                        color: '#D1D5DB',
+                        fontSize: '0.875rem',
+                        fontWeight: '600',
+                        marginBottom: '0.25rem'
+                      }}>
+                        Question {index + 1}
+                      </div>
+                      <div style={{
+                        fontSize: '1rem',
+                        fontWeight: 'bold',
+                        color: isCorrect ? '#10B981' : isSkipped ? '#9CA3AF' : '#EF4444'
+                      }}>
+                        {isCorrect ? '✓ Correct' : isSkipped ? '⊘ Skipped' : '✗ Incorrect'}
+                      </div>
+                    </div>
                   </div>
 
-                  {question.difficulty && (
-                    <span className={`px-2 py-1 rounded text-xs ${getDifficultyColor(question.difficulty)}`} style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
-                      {question.difficulty}
-                    </span>
-                  )}
+                  {/* Meta Tags */}
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    {question.subject && (
+                      <span style={{
+                        padding: '0.5rem 1rem',
+                        borderRadius: '9999px',
+                        fontSize: '0.875rem',
+                        background: 'rgba(177, 156, 217, 0.2)',
+                        color: '#B19CD9',
+                        fontWeight: '600'
+                      }}>
+                        {question.subject}
+                      </span>
+                    )}
+                    {question.difficulty && (
+                      <span style={{
+                        padding: '0.5rem 1rem',
+                        borderRadius: '9999px',
+                        fontSize: '0.875rem',
+                        background: 'rgba(59, 130, 246, 0.2)',
+                        color: '#3B82F6',
+                        fontWeight: '600'
+                      }}>
+                        {question.difficulty}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Question Text */}
-                <p className="text-white text-lg mb-4">{question.question}</p>
+                <div style={{
+                  padding: '1.5rem',
+                  borderRadius: '0.75rem',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  marginBottom: '1.5rem'
+                }}>
+                  <p style={{ color: 'white', fontSize: '1.125rem', lineHeight: '1.8' }}>
+                    {question.question}
+                  </p>
+                </div>
 
-                {/* Options */}
-                <div className="space-y-2">
+                {/* Options with Circular Badges */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
                   {question.options && Array.isArray(question.options) && question.options.map((option, optIndex) => {
                     const optionLetter = String.fromCharCode(65 + optIndex);
                     const isUserAnswer = userAnswer?.answer === optionLetter;
                     const isCorrectAnswer = question.answer === optionLetter;
 
+                    // Determine styling
+                    let optionBg, optionBorder, optionTextColor, badgeBg, badgeColor;
+
+                    if (isCorrectAnswer) {
+                      optionBg = 'rgba(16, 185, 129, 0.2)';
+                      optionBorder = '2px solid rgba(16, 185, 129, 0.6)';
+                      optionTextColor = '#10B981';
+                      badgeBg = '#10B981';
+                      badgeColor = '#FFFFFF';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                      optionBg = 'rgba(239, 68, 68, 0.2)';
+                      optionBorder = '2px solid rgba(239, 68, 68, 0.6)';
+                      optionTextColor = '#EF4444';
+                      badgeBg = '#EF4444';
+                      badgeColor = '#FFFFFF';
+                    } else {
+                      optionBg = 'rgba(255, 255, 255, 0.05)';
+                      optionBorder = '2px solid rgba(255, 255, 255, 0.1)';
+                      optionTextColor = '#D1D5DB';
+                      badgeBg = 'rgba(255, 255, 255, 0.1)';
+                      badgeColor = '#D1D5DB';
+                    }
+
                     return (
                       <div
                         key={optIndex}
-                        className="p-3 rounded-lg"
                         style={{
-                          background: isCorrectAnswer
-                            ? 'rgba(16, 185, 129, 0.2)'
-                            : isUserAnswer
-                            ? 'rgba(239, 68, 68, 0.2)'
-                            : 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid ' + (
-                            isCorrectAnswer
-                              ? 'rgba(16, 185, 129, 0.5)'
-                              : isUserAnswer
-                              ? 'rgba(239, 68, 68, 0.5)'
-                              : 'rgba(255, 255, 255, 0.1)'
-                          )
+                          padding: '1.25rem',
+                          borderRadius: '0.75rem',
+                          background: optionBg,
+                          border: optionBorder,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '1rem',
+                          position: 'relative'
                         }}
                       >
-                        <div className="flex items-center justify-between">
-                          <span className={
-                            isCorrectAnswer ? 'text-green-400' : isUserAnswer ? 'text-red-400' : 'text-gray-300'
-                          }>
-                            <span className="font-semibold">{optionLetter}.</span> {option}
-                          </span>
-                          {isCorrectAnswer && <CheckCircle size={16} color="#10B981" />}
-                          {isUserAnswer && !isCorrectAnswer && <XCircle size={16} color="#EF4444" />}
+                        {/* Circular Letter Badge */}
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          background: badgeBg,
+                          color: badgeColor,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1.125rem',
+                          fontWeight: 'bold',
+                          flexShrink: 0
+                        }}>
+                          {optionLetter}
                         </div>
+
+                        {/* Option Text */}
+                        <span style={{
+                          color: optionTextColor === '#D1D5DB' ? 'white' : optionTextColor,
+                          fontSize: '1rem',
+                          flex: 1,
+                          fontWeight: (isCorrectAnswer || isUserAnswer) ? '600' : 'normal'
+                        }}>
+                          {option}
+                        </span>
+
+                        {/* Status Icon */}
+                        {isCorrectAnswer && (
+                          <div style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            background: 'rgba(16, 185, 129, 0.3)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <CheckCircle size={20} color="#10B981" />
+                          </div>
+                        )}
+                        {isUserAnswer && !isCorrectAnswer && (
+                          <div style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            background: 'rgba(239, 68, 68, 0.3)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <XCircle size={20} color="#EF4444" />
+                          </div>
+                        )}
                       </div>
                     );
                   })}
                 </div>
 
+                {/* Your Answer Summary (if incorrect or skipped) */}
+                {!isCorrect && (
+                  <div style={{
+                    padding: '1rem 1.5rem',
+                    borderRadius: '0.75rem',
+                    background: isSkipped ? 'rgba(156, 163, 175, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                    border: isSkipped ? '1px solid rgba(156, 163, 175, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
+                    marginBottom: '1rem'
+                  }}>
+                    <p style={{
+                      color: isSkipped ? '#9CA3AF' : '#EF4444',
+                      fontSize: '0.875rem',
+                      fontWeight: '600'
+                    }}>
+                      {isSkipped
+                        ? '⊘ You did not answer this question'
+                        : `✗ Your Answer: ${userAnswer?.answer} (Incorrect) • Correct Answer: ${question.answer}`
+                      }
+                    </p>
+                  </div>
+                )}
+
                 {/* Explanation */}
                 {question.detailed_explanation && (
-                  <div className="mt-4 p-4 rounded-lg" style={{ background: 'rgba(255, 215, 0, 0.1)', border: '1px solid rgba(255, 215, 0, 0.3)' }}>
-                    <p className="text-sm font-semibold mb-2" style={{ color: '#FFD700' }}>Explanation:</p>
-                    <p className="text-gray-300 text-sm">{question.detailed_explanation}</p>
+                  <div style={{
+                    padding: '1.5rem',
+                    borderRadius: '0.75rem',
+                    background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%)',
+                    border: '2px solid rgba(255, 215, 0, 0.3)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                      <BookOpen size={20} color="#FFD700" />
+                      <p style={{ fontSize: '1rem', fontWeight: 'bold', color: '#FFD700' }}>
+                        Explanation
+                      </p>
+                    </div>
+                    <p style={{ color: '#D1D5DB', fontSize: '0.9375rem', lineHeight: '1.7' }}>
+                      {question.detailed_explanation}
+                    </p>
                   </div>
                 )}
               </div>
