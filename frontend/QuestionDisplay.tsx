@@ -88,17 +88,18 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
 
   return (
     <div style={{
-      maxWidth: '1000px',
+      maxWidth: '900px',
       margin: '0 auto',
-      padding: '1rem',
+      padding: '2rem 1.5rem',
+      minHeight: '100vh',
       color: '#F8FAFC'
     }}>
-      {/* Clean Header */}
+      {/* Clean Header with Progress */}
       <div style={{
         background: 'rgba(255, 255, 255, 0.03)',
-        borderRadius: '1rem',
-        padding: '1.25rem 1.5rem',
-        marginBottom: '1.5rem',
+        borderRadius: '1.25rem',
+        padding: '2rem 2.5rem',
+        marginBottom: '3rem',
         backdropFilter: 'blur(10px)',
         border: '1px solid rgba(255, 255, 255, 0.05)'
       }}>
@@ -107,39 +108,40 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '1rem'
+          gap: '1.5rem'
         }}>
           {/* Left: Question Info */}
           <div>
             <div style={{
-              fontSize: '0.85rem',
+              fontSize: '0.9rem',
               color: '#94A3B8',
-              marginBottom: '0.25rem'
+              marginBottom: '0.75rem',
+              letterSpacing: '0.02em'
             }}>
               Question {currentIndex + 1} of {totalQuestions}
             </div>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.75rem'
+              gap: '1rem'
             }}>
               <div style={{
-                width: '120px',
-                height: '6px',
+                width: '150px',
+                height: '8px',
                 background: 'rgba(255, 255, 255, 0.1)',
-                borderRadius: '3px',
+                borderRadius: '4px',
                 overflow: 'hidden'
               }}>
                 <div style={{
                   width: `${((currentIndex + 1) / totalQuestions) * 100}%`,
                   height: '100%',
                   background: 'linear-gradient(90deg, #3B82F6, #8B5CF6)',
-                  borderRadius: '3px',
+                  borderRadius: '4px',
                   transition: 'width 0.3s ease'
                 }}></div>
               </div>
               <span style={{
-                fontSize: '0.8rem',
+                fontSize: '0.85rem',
                 color: '#64748B',
                 fontWeight: '500'
               }}>
@@ -152,23 +154,23 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.75rem'
+            gap: '1rem'
           }}>
             {!reviewMode && timeRemaining !== undefined && (
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
+                gap: '0.75rem',
                 background: timeRemaining < 60 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)',
-                padding: '0.5rem 1rem',
-                borderRadius: '0.5rem',
+                padding: '0.75rem 1.25rem',
+                borderRadius: '0.75rem',
                 border: `1px solid ${timeRemaining < 60 ? 'rgba(239, 68, 68, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`,
               }}>
-                <Clock size={16} color={timeRemaining < 60 ? '#EF4444' : '#3B82F6'} />
+                <Clock size={18} color={timeRemaining < 60 ? '#EF4444' : '#3B82F6'} />
                 <span style={{
                   fontFamily: 'monospace',
                   fontWeight: '600',
-                  fontSize: '0.95rem',
+                  fontSize: '1.1rem',
                   color: timeRemaining < 60 ? '#EF4444' : '#3B82F6'
                 }}>
                   {formatTime(timeRemaining)}
@@ -181,14 +183,14 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
               style={{
                 background: 'rgba(59, 130, 246, 0.1)',
                 border: '1px solid rgba(59, 130, 246, 0.2)',
-                borderRadius: '0.5rem',
-                padding: '0.5rem 1rem',
+                borderRadius: '0.75rem',
+                padding: '0.75rem 1.25rem',
                 color: '#3B82F6',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                fontSize: '0.85rem',
+                fontSize: '0.9rem',
                 fontWeight: '500',
                 transition: 'all 0.2s'
               }}
@@ -210,17 +212,18 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
       {showPalette && (
         <div style={{
           background: 'rgba(255, 255, 255, 0.03)',
-          borderRadius: '1rem',
-          padding: '1.5rem',
-          marginBottom: '1.5rem',
+          borderRadius: '1.25rem',
+          padding: '2rem',
+          marginBottom: '3rem',
           border: '1px solid rgba(255, 255, 255, 0.05)'
         }}>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(45px, 1fr))',
-            gap: '0.5rem',
-            maxHeight: '200px',
-            overflowY: 'auto'
+            gridTemplateColumns: 'repeat(auto-fill, minmax(50px, 1fr))',
+            gap: '0.75rem',
+            maxHeight: '250px',
+            overflowY: 'auto',
+            padding: '0.5rem'
           }}>
             {Array.from({ length: totalQuestions }).map((_, idx) => {
               const answered = isAnswered(idx);
@@ -232,13 +235,13 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                   key={idx}
                   onClick={() => onJumpToQuestion(idx)}
                   style={{
-                    width: '45px',
-                    height: '45px',
+                    width: '50px',
+                    height: '50px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: '0.5rem',
-                    fontSize: '0.9rem',
+                    fontSize: '1rem',
                     fontWeight: current ? '600' : '500',
                     border: current ? '2px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
                     background:
@@ -275,10 +278,10 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                   {flagged && !reviewMode && (
                     <div style={{
                       position: 'absolute',
-                      top: '2px',
-                      right: '2px',
-                      width: '6px',
-                      height: '6px',
+                      top: '3px',
+                      right: '3px',
+                      width: '8px',
+                      height: '8px',
                       borderRadius: '50%',
                       background: '#EF4444'
                     }}></div>
@@ -291,72 +294,73 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
           {/* Legend */}
           <div style={{
             display: 'flex',
-            gap: '1.5rem',
-            marginTop: '1rem',
-            paddingTop: '1rem',
+            gap: '2rem',
+            marginTop: '1.5rem',
+            paddingTop: '1.5rem',
             borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-            fontSize: '0.75rem',
+            fontSize: '0.85rem',
             color: '#94A3B8'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '0.25rem', background: 'rgba(59, 130, 246, 0.2)', border: '2px solid #3B82F6' }}></div>
+              <div style={{ width: '14px', height: '14px', borderRadius: '0.25rem', background: 'rgba(59, 130, 246, 0.2)', border: '2px solid #3B82F6' }}></div>
               Current
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '0.25rem', background: 'rgba(16, 185, 129, 0.15)' }}></div>
+              <div style={{ width: '14px', height: '14px', borderRadius: '0.25rem', background: 'rgba(16, 185, 129, 0.15)' }}></div>
               Answered
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '0.25rem', background: 'rgba(239, 68, 68, 0.15)' }}></div>
+              <div style={{ width: '14px', height: '14px', borderRadius: '0.25rem', background: 'rgba(239, 68, 68, 0.15)' }}></div>
               Flagged
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '0.25rem', background: 'rgba(255, 255, 255, 0.05)' }}></div>
+              <div style={{ width: '14px', height: '14px', borderRadius: '0.25rem', background: 'rgba(255, 255, 255, 0.05)' }}></div>
               Not Visited
             </div>
           </div>
         </div>
       )}
 
-      {/* Question Card */}
+      {/* Question Card - ONE QUESTION AT A TIME */}
       <div style={{
         background: 'rgba(255, 255, 255, 0.03)',
-        borderRadius: '1rem',
-        padding: '2rem',
-        marginBottom: '1.5rem',
-        border: '1px solid rgba(255, 255, 255, 0.05)'
+        borderRadius: '1.25rem',
+        padding: '3rem',
+        marginBottom: '2.5rem',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        minHeight: '500px'
       }}>
         {/* Question Header */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '1.5rem',
-          paddingBottom: '1rem',
+          marginBottom: '2.5rem',
+          paddingBottom: '1.5rem',
           borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
         }}>
           <div style={{
             display: 'flex',
-            gap: '0.75rem',
+            gap: '1rem',
             alignItems: 'center',
-            fontSize: '0.8rem'
+            fontSize: '0.85rem'
           }}>
             <span style={{
               background: 'rgba(59, 130, 246, 0.1)',
               color: '#3B82F6',
-              padding: '0.25rem 0.75rem',
-              borderRadius: '0.5rem',
+              padding: '0.5rem 1rem',
+              borderRadius: '0.75rem',
               fontWeight: '500'
             }}>
               {question.topic}
             </span>
-            <span style={{ color: '#64748B' }}>
-              {question.year}
+            <span style={{ color: '#64748B', fontSize: '0.9rem' }}>
+              Year: {question.year}
             </span>
           </div>
           <div style={{
             display: 'flex',
-            gap: '0.5rem',
+            gap: '0.75rem',
             alignItems: 'center'
           }}>
             <span style={{
@@ -368,9 +372,9 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                 question.difficulty === 'Easy' ? '#10B981' :
                 question.difficulty === 'Medium' ? '#FBBF24' :
                 '#EF4444',
-              padding: '0.25rem 0.75rem',
-              borderRadius: '0.5rem',
-              fontSize: '0.75rem',
+              padding: '0.5rem 1rem',
+              borderRadius: '0.75rem',
+              fontSize: '0.8rem',
               fontWeight: '600'
             }}>
               {question.difficulty}
@@ -381,8 +385,8 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                 style={{
                   background: isFlagged(currentIndex) ? 'rgba(239, 68, 68, 0.1)' : 'transparent',
                   border: 'none',
-                  borderRadius: '0.5rem',
-                  padding: '0.5rem',
+                  borderRadius: '0.75rem',
+                  padding: '0.75rem',
                   color: isFlagged(currentIndex) ? '#EF4444' : '#64748B',
                   cursor: 'pointer',
                   display: 'flex',
@@ -391,28 +395,29 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                 }}
                 title={isFlagged(currentIndex) ? "Remove flag" : "Flag for review"}
               >
-                <Flag size={16} fill={isFlagged(currentIndex) ? '#EF4444' : 'none'} />
+                <Flag size={18} fill={isFlagged(currentIndex) ? '#EF4444' : 'none'} />
               </button>
             )}
           </div>
         </div>
 
-        {/* Question Text */}
+        {/* Question Text - More Spacious */}
         <div style={{
-          fontSize: '1.15rem',
-          lineHeight: 1.7,
+          fontSize: '1.25rem',
+          lineHeight: 2,
           color: '#F8FAFC',
-          marginBottom: '2rem',
-          fontWeight: '400'
+          marginBottom: '3rem',
+          fontWeight: '400',
+          letterSpacing: '0.01em'
         }}>
           {question.question}
         </div>
 
-        {/* Options */}
+        {/* Options - More Spacious */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.75rem'
+          gap: '1.25rem'
         }}>
           {question.options.map((option, idx) => {
             const letter = getOptionLetter(idx);
@@ -428,8 +433,8 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '1rem',
-                  padding: '1.25rem 1.5rem',
+                  gap: '1.5rem',
+                  padding: '1.75rem 2rem',
                   background:
                     isCorrectAnswer ? 'rgba(16, 185, 129, 0.1)' :
                     isWrongAnswer ? 'rgba(239, 68, 68, 0.1)' :
@@ -441,7 +446,7 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                     isSelected ? '#3B82F6' :
                     'rgba(255, 255, 255, 0.05)'
                   }`,
-                  borderRadius: '0.75rem',
+                  borderRadius: '1rem',
                   cursor: reviewMode ? 'default' : 'pointer',
                   textAlign: 'left',
                   transition: 'all 0.2s',
@@ -451,23 +456,25 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                   if (!reviewMode && !isSelected) {
                     e.currentTarget.style.background = 'rgba(59, 130, 246, 0.05)';
                     e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                    e.currentTarget.style.transform = 'translateX(5px)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!reviewMode && !isSelected) {
                     e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
                     e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
+                    e.currentTarget.style.transform = 'translateX(0)';
                   }
                 }}
               >
                 <div style={{
-                  minWidth: '36px',
-                  height: '36px',
+                  minWidth: '42px',
+                  height: '42px',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '0.9rem',
+                  fontSize: '1rem',
                   fontWeight: '600',
                   background:
                     isCorrectAnswer ? '#10B981' :
@@ -479,17 +486,18 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                   transition: 'all 0.2s'
                 }}>
                   {isCorrectAnswer ? (
-                    <CheckCircle size={18} />
+                    <CheckCircle size={20} />
                   ) : isWrongAnswer ? (
-                    <XCircle size={18} />
+                    <XCircle size={20} />
                   ) : (
                     letter
                   )}
                 </div>
                 <span style={{
                   color: '#F8FAFC',
-                  fontSize: '1rem',
-                  flex: 1
+                  fontSize: '1.1rem',
+                  flex: 1,
+                  lineHeight: 1.8
                 }}>
                   {option}
                 </span>
@@ -500,44 +508,44 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
 
         {/* Explanation (Review Mode) */}
         {reviewMode && question.detailed_explanation && (
-          <div style={{ marginTop: '2rem' }}>
+          <div style={{ marginTop: '3rem' }}>
             <button
               onClick={() => setShowExplanation(!showExplanation)}
               style={{
                 width: '100%',
                 background: 'rgba(139, 92, 246, 0.1)',
                 border: '1px solid rgba(139, 92, 246, 0.2)',
-                borderRadius: '0.75rem',
-                padding: '1rem 1.5rem',
+                borderRadius: '1rem',
+                padding: '1.25rem 2rem',
                 color: '#8B5CF6',
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                fontSize: '0.95rem',
+                fontSize: '1rem',
                 fontWeight: '500',
-                marginBottom: showExplanation ? '1rem' : '0'
+                marginBottom: showExplanation ? '1.5rem' : '0'
               }}
             >
               <span>{showExplanation ? 'Hide Explanation' : 'View Explanation'}</span>
-              <span style={{ fontSize: '1.2rem' }}>{showExplanation ? '−' : '+'}</span>
+              <span style={{ fontSize: '1.5rem' }}>{showExplanation ? '−' : '+'}</span>
             </button>
 
             {showExplanation && (
               <div style={{
                 background: 'rgba(139, 92, 246, 0.05)',
                 border: '1px solid rgba(139, 92, 246, 0.1)',
-                borderRadius: '0.75rem',
-                padding: '1.5rem',
-                fontSize: '0.95rem',
-                lineHeight: 1.7,
+                borderRadius: '1rem',
+                padding: '2rem',
+                fontSize: '1.05rem',
+                lineHeight: 1.9,
                 color: '#CBD5E1'
               }}>
                 <div style={{
                   fontWeight: '600',
                   color: '#8B5CF6',
-                  marginBottom: '0.75rem',
-                  fontSize: '0.9rem',
+                  marginBottom: '1.25rem',
+                  fontSize: '0.95rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em'
                 }}>
@@ -549,17 +557,17 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                   <div style={{
                     display: 'flex',
                     flexWrap: 'wrap',
-                    gap: '0.5rem',
-                    marginTop: '1rem',
-                    paddingTop: '1rem',
+                    gap: '0.75rem',
+                    marginTop: '1.5rem',
+                    paddingTop: '1.5rem',
                     borderTop: '1px solid rgba(139, 92, 246, 0.1)'
                   }}>
                     {question.tags.map((tag, index) => (
                       <span key={index} style={{
                         background: 'rgba(139, 92, 246, 0.1)',
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '0.5rem',
-                        fontSize: '0.75rem',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '0.75rem',
+                        fontSize: '0.85rem',
                         color: '#A78BFA'
                       }}>
                         {tag}
@@ -573,16 +581,16 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
         )}
       </div>
 
-      {/* Navigation Footer */}
+      {/* Navigation Footer - Large and Clear */}
       <div style={{
         background: 'rgba(255, 255, 255, 0.03)',
-        borderRadius: '1rem',
-        padding: '1.25rem 1.5rem',
+        borderRadius: '1.25rem',
+        padding: '2rem 2.5rem',
         border: '1px solid rgba(255, 255, 255, 0.05)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        gap: '1rem'
+        gap: '1.5rem'
       }}>
         <button
           onClick={onPrevQuestion}
@@ -590,48 +598,50 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.75rem 1.25rem',
+            gap: '0.75rem',
+            padding: '1rem 2rem',
             background: currentIndex === 0 ? 'rgba(255, 255, 255, 0.03)' : 'rgba(59, 130, 246, 0.1)',
             color: currentIndex === 0 ? '#475569' : '#3B82F6',
             border: `1px solid ${currentIndex === 0 ? 'rgba(255, 255, 255, 0.05)' : 'rgba(59, 130, 246, 0.2)'}`,
-            borderRadius: '0.75rem',
+            borderRadius: '1rem',
             cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
             fontWeight: '500',
-            fontSize: '0.9rem',
+            fontSize: '1rem',
             transition: 'all 0.2s'
           }}
           onMouseEnter={(e) => {
             if (currentIndex !== 0) {
               e.currentTarget.style.background = 'rgba(59, 130, 246, 0.15)';
+              e.currentTarget.style.transform = 'translateX(-3px)';
             }
           }}
           onMouseLeave={(e) => {
             if (currentIndex !== 0) {
               e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+              e.currentTarget.style.transform = 'translateX(0)';
             }
           }}
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft size={20} />
           Previous
         </button>
 
         <div style={{
           display: 'flex',
-          gap: '0.75rem'
+          gap: '1rem'
         }}>
           {!reviewMode && !isAnswered(currentIndex) && selectedOption && (
             <button
               onClick={handleSubmit}
               style={{
-                padding: '0.75rem 1.5rem',
+                padding: '1rem 2.5rem',
                 background: 'linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)',
                 color: 'white',
                 border: 'none',
-                borderRadius: '0.75rem',
+                borderRadius: '1rem',
                 fontWeight: '600',
                 cursor: 'pointer',
-                fontSize: '0.9rem',
+                fontSize: '1rem',
                 boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
                 transition: 'all 0.2s'
               }}
@@ -652,14 +662,14 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
             <button
               onClick={onEndTest}
               style={{
-                padding: '0.75rem 1.5rem',
+                padding: '1rem 2rem',
                 background: reviewMode ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                 color: reviewMode ? '#10B981' : '#EF4444',
                 border: `1px solid ${reviewMode ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
-                borderRadius: '0.75rem',
+                borderRadius: '1rem',
                 fontWeight: '600',
                 cursor: 'pointer',
-                fontSize: '0.9rem',
+                fontSize: '1rem',
                 transition: 'all 0.2s'
               }}
               onMouseEnter={(e) => {
@@ -677,26 +687,28 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.75rem 1.25rem',
+                gap: '0.75rem',
+                padding: '1rem 2rem',
                 background: 'rgba(59, 130, 246, 0.1)',
                 color: '#3B82F6',
                 border: '1px solid rgba(59, 130, 246, 0.2)',
-                borderRadius: '0.75rem',
+                borderRadius: '1rem',
                 cursor: 'pointer',
                 fontWeight: '500',
-                fontSize: '0.9rem',
+                fontSize: '1rem',
                 transition: 'all 0.2s'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'rgba(59, 130, 246, 0.15)';
+                e.currentTarget.style.transform = 'translateX(3px)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                e.currentTarget.style.transform = 'translateX(0)';
               }}
             >
               Next
-              <ChevronRight size={18} />
+              <ChevronRight size={20} />
             </button>
           )}
         </div>
