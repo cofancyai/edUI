@@ -15,11 +15,11 @@ interface ExamBotProps {
 
 interface Filters {
   exam: string;
-  subjects: string[]; // Multi-select
-  years: number[]; // Multi-select
-  difficulties: string[]; // Multi-select
+  subject: string;
   topic: string;
   subtopic: string;
+  year: number | null;
+  difficulty: string;
 }
 
 interface TestSession {
@@ -56,11 +56,11 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
   // Filters
   const [filters, setFilters] = useState<Filters>({
     exam: '',
-    subjects: [],
-    years: [],
-    difficulties: [],
+    subject: '',
     topic: '',
-    subtopic: ''
+    subtopic: '',
+    year: null,
+    difficulty: ''
   });
 
   // Test session
@@ -210,27 +210,16 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
       setLoading(true);
       setError(null);
 
-      // Fetch all questions for the selected exam
+      // Build query filters
       const queryFilters: any = {};
       if (filters.exam) queryFilters.exam = filters.exam;
+      if (filters.subject) queryFilters.subject = filters.subject;
       if (filters.topic) queryFilters.topicId = filters.topic;
       if (filters.subtopic) queryFilters.subtopicId = filters.subtopic;
+      if (filters.year) queryFilters.year = filters.year;
+      if (filters.difficulty) queryFilters.difficulty = filters.difficulty;
 
-      let fetchedQuestions = await examBotService.getQuestions(queryFilters);
-
-      // Client-side filtering for multi-select filters
-      if (filters.subjects.length > 0) {
-        fetchedQuestions = fetchedQuestions.filter(q => filters.subjects.includes(q.subject));
-      }
-
-      if (filters.years.length > 0) {
-        fetchedQuestions = fetchedQuestions.filter(q => q.year && filters.years.includes(q.year));
-      }
-
-      if (filters.difficulties.length > 0) {
-        fetchedQuestions = fetchedQuestions.filter(q => q.difficulty && filters.difficulties.includes(q.difficulty));
-      }
-
+      const fetchedQuestions = await examBotService.getQuestions(queryFilters);
       setQuestions(fetchedQuestions);
       setStats(prev => ({ ...prev, totalQuestions: fetchedQuestions.length }));
 
@@ -247,11 +236,11 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
 
       // Reset dependent filters
       if (key === 'exam') {
+        newFilters.subject = '';
         newFilters.topic = '';
         newFilters.subtopic = '';
-        newFilters.subjects = [];
-        newFilters.years = [];
-        newFilters.difficulties = [];
+        newFilters.year = null;
+        newFilters.difficulty = '';
       } else if (key === 'topic') {
         newFilters.subtopic = '';
       }
@@ -385,22 +374,21 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
     }
   };
 
-  // Helper: Toggle item in array (for multi-select)
-  const toggleArrayItem = <T,>(array: T[], item: T): T[] => {
-    return array.includes(item) ? array.filter(i => i !== item) : [...array, item];
-  };
-
-  // Handler: Select exam and move to filter selection
-  const handleExamSelect = async (examName: string) => {
-    setFilters(prev => ({ ...prev, exam: examName }));
+  // Handler: Submit exam selection
+  const handleExamSubmit = async () => {
+    if (!filters.exam) {
+      setError('Please select an exam');
+      return;
+    }
+    setError(null);
     setViewMode('selectFilters');
-    await loadExamFilters(examName);
+    await loadExamFilters(filters.exam);
   };
 
   // Render functions for different views
-  // Render: Exam Selection Screen (Step 1)
+  // Render: Exam Selection Screen (Step 1) - Dropdown
   const renderExamSelection = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '600px', margin: '0 auto' }}>
       {/* Header */}
       <div
         style={{
@@ -413,82 +401,94 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
         }}
       >
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem', color: '#FFD700' }}>
-          Select Your Exam
+          Welcome to ExamBot
         </h1>
         <p style={{ color: '#D1D5DB', fontSize: '1.125rem' }}>
-          Choose an exam to start practicing. You'll be able to filter by subjects, years, and difficulty in the next step.
+          Select an exam to start practicing
         </p>
       </div>
 
-      {/* Exam Cards Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-        {examCategories.map(exam => (
-          <div
-            key={exam.id}
-            onClick={() => handleExamSelect(exam.category_name)}
+      {/* Exam Selection Form */}
+      <div
+        style={{
+          padding: "2rem",
+          borderRadius: "1rem",
+          background: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 215, 0, 0.2)'
+        }}
+      >
+        <div style={{ marginBottom: '1.5rem' }}>
+          <label style={{ display: "block", fontSize: "1rem", fontWeight: '600', color: "#FFD700", marginBottom: "0.75rem" }}>
+            Select Exam
+          </label>
+          <select
+            value={filters.exam}
+            onChange={(e) => handleFilterChange('exam', e.target.value)}
             style={{
-              padding: '1.5rem',
-              borderRadius: '0.75rem',
-              background: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(10px)',
-              border: '2px solid rgba(255, 215, 0, 0.2)',
-              cursor: 'pointer',
-              transition: 'all 0.3s',
-              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.5)';
-              e.currentTarget.style.boxShadow = '0 8px 24px rgba(255, 215, 0, 0.2)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.2)';
-              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
+              width: "100%",
+              padding: "0.75rem 1rem",
+              fontSize: '1rem',
+              borderRadius: "0.5rem",
+              outline: "none",
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '2px solid rgba(255, 215, 0, 0.3)',
+              color: 'white',
+              cursor: 'pointer'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-              <BookOpen size={32} color="#FFD700" />
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: 'white', margin: 0 }}>
+            <option value="" style={{ background: '#1a1a4e', color: 'white' }}>Select Exam</option>
+            {examCategories.map(exam => (
+              <option key={exam.id} value={exam.category_name} style={{ background: '#1a1a4e', color: 'white' }}>
                 {exam.category_name}
-              </h3>
-            </div>
-            {exam.description && (
-              <p style={{ color: '#D1D5DB', fontSize: '0.875rem', marginBottom: '1rem' }}>
-                {exam.description}
-              </p>
-            )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#FFD700' }}>
-              <ChevronRight size={20} />
-              <span style={{ fontSize: '0.875rem', fontWeight: '500' }}>Start Practicing</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {examCategories.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '3rem', color: '#9CA3AF' }}>
-          <p>No exams available. Please add exams to the database.</p>
+              </option>
+            ))}
+          </select>
         </div>
-      )}
+
+        <button
+          onClick={handleExamSubmit}
+          disabled={!filters.exam}
+          style={{
+            width: '100%',
+            padding: '1rem 1.5rem',
+            borderRadius: '0.5rem',
+            fontWeight: '600',
+            fontSize: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            cursor: filters.exam ? 'pointer' : 'not-allowed',
+            border: 'none',
+            background: filters.exam ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)' : 'rgba(255, 255, 255, 0.1)',
+            color: filters.exam ? '#1a1a4e' : '#666',
+            transition: 'all 0.3s',
+            boxShadow: filters.exam ? '0 4px 16px rgba(255, 215, 0, 0.3)' : 'none'
+          }}
+        >
+          <ChevronRight size={20} />
+          Submit
+        </button>
+      </div>
     </div>
   );
 
-  // Render: Filter Selection Screen (Step 2)
+  // Render: Filter Selection Screen (Step 2) - Dropdowns
   const renderFilterSelection = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Header with Back Button */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <button
           onClick={() => {
             setViewMode('selectExam');
             setFilters({
               exam: '',
-              subjects: [],
-              years: [],
-              difficulties: [],
+              subject: '',
               topic: '',
-              subtopic: ''
+              subtopic: '',
+              year: null,
+              difficulty: ''
             });
           }}
           style={{
@@ -503,12 +503,6 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
             cursor: 'pointer',
             transition: 'all 0.3s'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-          }}
         >
           <ChevronLeft size={20} />
           Back
@@ -518,7 +512,7 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
             {filters.exam}
           </h1>
           <p style={{ color: '#D1D5DB', fontSize: '0.875rem', margin: 0 }}>
-            Select filters to customize your practice session
+            Select filters and click Submit to start practice
           </p>
         </div>
       </div>
@@ -526,204 +520,160 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
       {/* Filters Container */}
       <div
         style={{
-          padding: '2rem',
-          borderRadius: '1rem',
+          padding: "2rem",
+          borderRadius: "1rem",
           background: 'rgba(255, 255, 255, 0.05)',
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(255, 215, 0, 0.2)'
         }}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
-          {/* Subjects Multi-Select */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+          {/* Subject Dropdown */}
           {availableSubjects.length > 0 && (
             <div>
-              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#FFD700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Filter size={20} />
-                Subjects
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '300px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+              <label style={{ display: "block", fontSize: "0.875rem", fontWeight: '600', color: "#FFD700", marginBottom: "0.75rem" }}>
+                Subject
+              </label>
+              <select
+                value={filters.subject}
+                onChange={(e) => handleFilterChange('subject', e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "0.5rem",
+                  outline: "none",
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '2px solid rgba(255, 215, 0, 0.3)',
+                  color: 'white',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="" style={{ background: '#1a1a4e' }}>All Subjects</option>
                 {availableSubjects.map(subject => (
-                  <label
-                    key={subject}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      padding: '0.75rem',
-                      borderRadius: '0.5rem',
-                      background: filters.subjects.includes(subject) ? 'rgba(255, 215, 0, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                      border: `1px solid ${filters.subjects.includes(subject) ? 'rgba(255, 215, 0, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!filters.subjects.includes(subject)) {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!filters.subjects.includes(subject)) {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                      }
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={filters.subjects.includes(subject)}
-                      onChange={() => setFilters(prev => ({ ...prev, subjects: toggleArrayItem(prev.subjects, subject) }))}
-                      style={{
-                        width: '18px',
-                        height: '18px',
-                        accentColor: '#FFD700',
-                        cursor: 'pointer'
-                      }}
-                    />
-                    <span style={{ color: 'white', fontSize: '0.9375rem' }}>{subject}</span>
-                  </label>
+                  <option key={subject} value={subject} style={{ background: '#1a1a4e' }}>
+                    {subject}
+                  </option>
                 ))}
-              </div>
+              </select>
             </div>
           )}
 
-          {/* Years Multi-Select */}
+          {/* Topic Dropdown */}
+          {filteredTopics.length > 0 && (
+            <div>
+              <label style={{ display: "block", fontSize: "0.875rem", fontWeight: '600', color: "#FFD700", marginBottom: "0.75rem" }}>
+                Topic
+              </label>
+              <select
+                value={filters.topic}
+                onChange={(e) => handleFilterChange('topic', e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "0.5rem",
+                  outline: "none",
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '2px solid rgba(255, 215, 0, 0.3)',
+                  color: 'white',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="" style={{ background: '#1a1a4e' }}>All Topics</option>
+                {filteredTopics.map(topic => (
+                  <option key={topic.id} value={topic.id} style={{ background: '#1a1a4e' }}>
+                    {topic.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Subtopic Dropdown */}
+          {filters.topic && subtopics.length > 0 && (
+            <div>
+              <label style={{ display: "block", fontSize: "0.875rem", fontWeight: '600', color: "#FFD700", marginBottom: "0.75rem" }}>
+                Subtopic
+              </label>
+              <select
+                value={filters.subtopic}
+                onChange={(e) => handleFilterChange('subtopic', e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "0.5rem",
+                  outline: "none",
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '2px solid rgba(255, 215, 0, 0.3)',
+                  color: 'white',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="" style={{ background: '#1a1a4e' }}>All Subtopics</option>
+                {subtopics.map(subtopic => (
+                  <option key={subtopic.id} value={subtopic.id} style={{ background: '#1a1a4e' }}>
+                    {subtopic.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Year Dropdown */}
           {availableYears.length > 0 && (
             <div>
-              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#FFD700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Calendar size={20} />
-                Years
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '300px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+              <label style={{ display: "block", fontSize: "0.875rem", fontWeight: '600', color: "#FFD700", marginBottom: "0.75rem" }}>
+                Year
+              </label>
+              <select
+                value={filters.year || ''}
+                onChange={(e) => handleFilterChange('year', e.target.value ? Number(e.target.value) : null)}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "0.5rem",
+                  outline: "none",
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '2px solid rgba(255, 215, 0, 0.3)',
+                  color: 'white',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="" style={{ background: '#1a1a4e' }}>All Years</option>
                 {availableYears.map(year => (
-                  <label
-                    key={year}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      padding: '0.75rem',
-                      borderRadius: '0.5rem',
-                      background: filters.years.includes(year) ? 'rgba(255, 215, 0, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                      border: `1px solid ${filters.years.includes(year) ? 'rgba(255, 215, 0, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!filters.years.includes(year)) {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!filters.years.includes(year)) {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                      }
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={filters.years.includes(year)}
-                      onChange={() => setFilters(prev => ({ ...prev, years: toggleArrayItem(prev.years, year) }))}
-                      style={{
-                        width: '18px',
-                        height: '18px',
-                        accentColor: '#FFD700',
-                        cursor: 'pointer'
-                      }}
-                    />
-                    <span style={{ color: 'white', fontSize: '0.9375rem' }}>{year}</span>
-                  </label>
+                  <option key={year} value={year} style={{ background: '#1a1a4e' }}>
+                    {year}
+                  </option>
                 ))}
-              </div>
+              </select>
             </div>
           )}
 
-          {/* Difficulty Multi-Select */}
+          {/* Difficulty Dropdown */}
           <div>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#FFD700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <TrendingUp size={20} />
+            <label style={{ display: "block", fontSize: "0.875rem", fontWeight: '600', color: "#FFD700", marginBottom: "0.75rem" }}>
               Difficulty
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {['Easy', 'Medium', 'Hard'].map(difficulty => (
-                <label
-                  key={difficulty}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.75rem',
-                    borderRadius: '0.5rem',
-                    background: filters.difficulties.includes(difficulty) ? 'rgba(255, 215, 0, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                    border: `1px solid ${filters.difficulties.includes(difficulty) ? 'rgba(255, 215, 0, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!filters.difficulties.includes(difficulty)) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!filters.difficulties.includes(difficulty)) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                    }
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={filters.difficulties.includes(difficulty)}
-                    onChange={() => setFilters(prev => ({ ...prev, difficulties: toggleArrayItem(prev.difficulties, difficulty) }))}
-                    style={{
-                      width: '18px',
-                      height: '18px',
-                      accentColor: '#FFD700',
-                      cursor: 'pointer'
-                    }}
-                  />
-                  <span style={{ color: 'white', fontSize: '0.9375rem' }}>{difficulty}</span>
-                </label>
-              ))}
-            </div>
+            </label>
+            <select
+              value={filters.difficulty}
+              onChange={(e) => handleFilterChange('difficulty', e.target.value)}
+              style={{
+                width: "100%",
+                padding: "0.75rem 1rem",
+                borderRadius: "0.5rem",
+                outline: "none",
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '2px solid rgba(255, 215, 0, 0.3)',
+                color: 'white',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="" style={{ background: '#1a1a4e' }}>All Difficulties</option>
+              <option value="Easy" style={{ background: '#1a1a4e' }}>Easy</option>
+              <option value="Medium" style={{ background: '#1a1a4e' }}>Medium</option>
+              <option value="Hard" style={{ background: '#1a1a4e' }}>Hard</option>
+            </select>
           </div>
         </div>
-
-        {/* Selected Filters Summary */}
-        {(filters.subjects.length > 0 || filters.years.length > 0 || filters.difficulties.length > 0) && (
-          <div style={{ marginTop: '2rem', padding: '1rem', borderRadius: '0.5rem', background: 'rgba(255, 215, 0, 0.05)', border: '1px solid rgba(255, 215, 0, 0.2)' }}>
-            <h4 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#FFD700', marginBottom: '0.75rem' }}>Selected Filters:</h4>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-              {filters.subjects.map(subject => (
-                <span key={subject} style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.875rem', background: 'rgba(255, 215, 0, 0.2)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  {subject}
-                  <X
-                    size={14}
-                    onClick={() => setFilters(prev => ({ ...prev, subjects: prev.subjects.filter(s => s !== subject) }))}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </span>
-              ))}
-              {filters.years.map(year => (
-                <span key={year} style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.875rem', background: 'rgba(255, 215, 0, 0.2)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  {year}
-                  <X
-                    size={14}
-                    onClick={() => setFilters(prev => ({ ...prev, years: prev.years.filter(y => y !== year) }))}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </span>
-              ))}
-              {filters.difficulties.map(difficulty => (
-                <span key={difficulty} style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.875rem', background: 'rgba(255, 215, 0, 0.2)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  {difficulty}
-                  <X
-                    size={14}
-                    onClick={() => setFilters(prev => ({ ...prev, difficulties: prev.difficulties.filter(d => d !== difficulty) }))}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Action Buttons */}
         <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
@@ -747,18 +697,6 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
               transition: 'all 0.3s',
               boxShadow: loading ? 'none' : '0 4px 16px rgba(255, 215, 0, 0.3)'
             }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 215, 0, 0.4)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 215, 0, 0.3)';
-              }
-            }}
           >
             <Play size={20} />
             Start Practice
@@ -766,7 +704,14 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
 
           <button
             onClick={() => {
-              setFilters(prev => ({ ...prev, subjects: [], years: [], difficulties: [] }));
+              setFilters(prev => ({
+                ...prev,
+                subject: '',
+                topic: '',
+                subtopic: '',
+                year: null,
+                difficulty: ''
+              }));
             }}
             style={{
               padding: '1rem 1.5rem',
@@ -778,12 +723,6 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
               color: 'white',
               transition: 'all 0.3s'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-            }}
           >
             Clear Filters
           </button>
@@ -791,8 +730,6 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
       </div>
     </div>
   );
-
-
   const renderPractice = () => (
     <div className="space-y-6">
       {/* Header */}
