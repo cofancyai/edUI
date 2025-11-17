@@ -156,8 +156,17 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
 
   const loadSubtopics = async (topicId: string) => {
     try {
-      const subtopicsList = await examBotService.getSubtopics(topicId);
-      setSubtopics(subtopicsList);
+      // Get subtopics that have questions from the database
+      const subtopicsFromQuestions = await examBotService.getSubtopicsByTopic(topicId);
+
+      // Get all subtopics for this topic
+      const allSubtopics = await examBotService.getSubtopics(topicId);
+
+      // Filter to only show subtopics that have questions
+      const subtopicIds = subtopicsFromQuestions.map(s => s.subtopic_id);
+      const filtered = allSubtopics.filter(s => subtopicIds.includes(s.id));
+
+      setSubtopics(filtered);
     } catch (err: any) {
       console.error('Error loading subtopics:', err);
     }
