@@ -138,9 +138,13 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
       const subjects = await examBotService.getSubjectsByExam(exam);
       setAvailableSubjects(subjects);
 
-      // Get topics/subtopics for this exam
+      // Get topics that have questions for this exam
       const topicsList = await examBotService.getTopicsByExamAndSubject(exam, filters.subject || '');
-      // Note: topics are already loaded, but we can filter them
+
+      // Filter topics to only show those with questions
+      const topicIds = topicsList.map(t => t.topic_id);
+      const filteredTopics = topics.filter(t => topicIds.includes(t.id));
+      setTopics(filteredTopics);
 
       setLoading(false);
     } catch (err: any) {
@@ -649,35 +653,35 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
 
       {/* Applied Filters */}
       <div
-        className="p-4 rounded-lg"
+        style={{padding: "1rem", borderRadius: "0.5rem"}}
         style={{
           background: 'rgba(255, 255, 255, 0.05)',
           border: '1px solid rgba(255, 255, 255, 0.1)'
         }}
       >
-        <div className="flex flex-wrap gap-2">
+        <div style={{display: "flex", flexWrap: "wrap", gap: "0.5rem"}}>
           {filters.exam && (
-            <span className="px-3 py-1 rounded-full text-sm" style={{ background: 'rgba(255, 215, 0, 0.2)', color: '#FFD700' }}>
+            <span style={{padding: "0.25rem 0.75rem", borderRadius: "9999px", fontSize: "0.875rem"}} style={{ background: 'rgba(255, 215, 0, 0.2)', color: '#FFD700' }}>
               {filters.exam}
             </span>
           )}
           {filters.subject && (
-            <span className="px-3 py-1 rounded-full text-sm" style={{ background: 'rgba(177, 156, 217, 0.2)', color: '#B19CD9' }}>
+            <span style={{padding: "0.25rem 0.75rem", borderRadius: "9999px", fontSize: "0.875rem"}} style={{ background: 'rgba(177, 156, 217, 0.2)', color: '#B19CD9' }}>
               {filters.subject}
             </span>
           )}
           {filters.topic && topics.find(t => t.id === filters.topic) && (
-            <span className="px-3 py-1 rounded-full text-sm" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10B981' }}>
+            <span style={{padding: "0.25rem 0.75rem", borderRadius: "9999px", fontSize: "0.875rem"}} style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10B981' }}>
               {topics.find(t => t.id === filters.topic)?.name}
             </span>
           )}
           {filters.subtopic && subtopics.find(s => s.id === filters.subtopic) && (
-            <span className="px-3 py-1 rounded-full text-sm" style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#3B82F6' }}>
+            <span style={{padding: "0.25rem 0.75rem", borderRadius: "9999px", fontSize: "0.875rem"}} style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#3B82F6' }}>
               {subtopics.find(s => s.id === filters.subtopic)?.name}
             </span>
           )}
           {filters.year && (
-            <span className="px-3 py-1 rounded-full text-sm" style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#F59E0B' }}>
+            <span style={{padding: "0.25rem 0.75rem", borderRadius: "9999px", fontSize: "0.875rem"}} style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#F59E0B' }}>
               Year: {filters.year}
             </span>
           )}
@@ -936,7 +940,7 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
           </button>
 
           {/* Question Grid */}
-          <div className="flex flex-wrap gap-2">
+          <div style={{display: "flex", flexWrap: "wrap", gap: "0.5rem"}}>
             {testSession.questions.map((q, idx) => {
               const ans = userAnswers.get(q.id);
               const isAnswered = ans && ans.answer;
