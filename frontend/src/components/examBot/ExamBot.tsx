@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-  BookOpen, Calendar, Filter, Search, Bookmark, Play,
+  BookOpen, Calendar, Filter, Bookmark, Play,
   Clock, CheckCircle, XCircle, Flag, RotateCcw, Eye,
   Trophy, TrendingUp, ChevronRight, ChevronLeft, X
 } from 'lucide-react';
 import LoadingIndicator from '../LoadingIndicator';
 import ErrorMessage from '../ErrorMessage';
-import { examBotService, supabase, Question, ExamCategory, Topic, Subtopic } from '../../services/examBotService';
+import { examBotService, supabase, Question, ExamCategory } from '../../services/examBotService';
 
 interface ExamBotProps {
   selectedLanguage?: string;
@@ -38,7 +38,7 @@ interface UserAnswer {
 
 type ViewMode = 'selectExam' | 'selectFilters' | 'browse' | 'practice' | 'test' | 'results' | 'review';
 
-const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthenticated = true }) => {
+const ExamBot: React.FC<ExamBotProps> = () => {
   // State
   const [viewMode, setViewMode] = useState<ViewMode>('selectExam');
   const [loading, setLoading] = useState(false);
@@ -46,9 +46,6 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
 
   // Data from Supabase
   const [examCategories, setExamCategories] = useState<ExamCategory[]>([]);
-  const [topics, setTopics] = useState<Topic[]>([]);
-  const [filteredTopics, setFilteredTopics] = useState<Topic[]>([]);
-  const [subtopics, setSubtopics] = useState<Subtopic[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
@@ -70,12 +67,9 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [testResults, setTestResults] = useState<any>(null);
 
-  // Statistics
-  const [stats, setStats] = useState({
-    totalQuestions: 0,
-    attempted: 0,
-    bookmarked: 0
-  });
+  // Track attempted questions in practice mode
+  const [attemptedQuestions, setAttemptedQuestions] = useState<Set<number>>(new Set());
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
   // Load initial data
   useEffect(() => {
@@ -115,10 +109,6 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
 
       setExamCategories(filteredExams);
 
-      // Load all topics (for reference)
-      const allTopics = await examBotService.getTopics();
-      setTopics(allTopics);
-
       setLoading(false);
     } catch (err: any) {
       setError(err.message || 'Failed to load data');
@@ -135,12 +125,12 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
 
   // No longer needed - we show all available years with checkboxes
 
-  // Update subtopics when topic changes
-  useEffect(() => {
-    if (filters.topic) {
-      loadSubtopics(filters.topic);
-    }
-  }, [filters.topic]);
+  // Update subtopics when topic changes (currently not used in multi-select flow)
+  // useEffect(() => {
+  //   if (filters.topics.length > 0) {
+  //     loadSubtopics(filters.topics[0]);
+  //   }
+  // }, [filters.topics]);
 
   const loadExamFilters = async (exam: string) => {
     try {
@@ -154,13 +144,10 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
       const subjects = await examBotService.getSubjectsByExam(exam);
       setAvailableSubjects(subjects);
 
-      // Get topics that have questions for this exam
-      const topicsList = await examBotService.getTopicsByExamAndSubject(exam, filters.subject || '');
-
-      // Filter topics to only show those with questions
-      const topicIds = topicsList.map(t => t.topic_id);
-      const filtered = topics.filter(t => topicIds.includes(t.id));
-      setFilteredTopics(filtered);
+      // Topics are not used in current multi-select flow
+      // const topicsList = await examBotService.getTopicsByExamAndSubject(exam, '');
+      // const topicIds = topicsList.map(t => t.topic_id);
+      // const filtered = topics.filter(t => topicIds.includes(t.id));
 
       setLoading(false);
     } catch (err: any) {
@@ -169,41 +156,8 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
     }
   };
 
-  const loadSubtopics = async (topicId: string) => {
-    try {
-      // Get subtopics that have questions from the database
-      const subtopicsFromQuestions = await examBotService.getSubtopicsByTopic(topicId);
-
-      // Get all subtopics for this topic
-      const allSubtopics = await examBotService.getSubtopics(topicId);
-
-      // Filter to only show subtopics that have questions
-      const subtopicIds = subtopicsFromQuestions.map(s => s.subtopic_id);
-      const filtered = allSubtopics.filter(s => subtopicIds.includes(s.id));
-
-      setSubtopics(filtered);
-    } catch (err: any) {
-      console.error('Error loading subtopics:', err);
-    }
-  };
-
-  const loadYearsForExam = async (exam: string) => {
-    try {
-      const years = await examBotService.getAvailableYears(exam);
-      setAvailableYears(years);
-    } catch (err: any) {
-      console.error('Error loading years for exam:', err);
-    }
-  };
-
-  const loadYearsForSubject = async (exam: string, subject: string) => {
-    try {
-      const years = await examBotService.getAvailableYearsByExamAndSubject(exam, subject);
-      setAvailableYears(years);
-    } catch (err: any) {
-      console.error('Error loading years for subject:', err);
-    }
-  };
+  // Removed unused functions: loadSubtopics, loadYearsForExam, loadYearsForSubject
+  // (not needed in current multi-select flow)
 
   const loadQuestions = async () => {
     try {
@@ -238,8 +192,6 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
       }
 
       setQuestions(fetchedQuestions);
-      setStats(prev => ({ ...prev, totalQuestions: fetchedQuestions.length }));
-
       setLoading(false);
     } catch (err: any) {
       setError(err.message || 'Failed to load questions');
@@ -276,28 +228,13 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
     }
 
     await loadQuestions();
+    setCurrentQuestionIndex(0);
+    setAttemptedQuestions(new Set());
+    setSelectedAnswer(null);
     setViewMode('practice');
   };
 
-  const startTest = async (timeLimit?: number) => {
-    if (questions.length === 0) {
-      setError('No questions available for selected filters');
-      return;
-    }
-
-    const session: TestSession = {
-      questions: [...questions],
-      startTime: Date.now(),
-      timeLimit,
-      filters: { ...filters }
-    };
-
-    setTestSession(session);
-    setCurrentQuestionIndex(0);
-    setUserAnswers(new Map());
-    setTimeElapsed(0);
-    setViewMode('test');
-  };
+  // startTest function removed - test mode available in test view
 
   const answerQuestion = (questionId: string, answer: string) => {
     const newAnswers = new Map(userAnswers);
@@ -759,58 +696,28 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
   );
 
   const renderPractice = () => {
-    const currentQuestion = questions[currentQuestionIndex];
-
-    return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => {
-              setViewMode('selectFilters');
-              setCurrentQuestionIndex(0);
-            }}
-            className="px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
-            style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 215, 0, 0.3)',
-              color: 'white'
-            }}
-          >
-            <ChevronLeft size={20} />
-            Back
-          </button>
-
-          <div style={{ textAlign: 'center' }}>
-            <h2 className="text-2xl font-bold" style={{ color: '#FFD700' }}>
-              Practice Mode
-            </h2>
-            {questions.length > 0 && (
-              <p className="text-gray-400 text-sm">
-                Question {currentQuestionIndex + 1} of {questions.length}
-              </p>
-            )}
+    // No questions found case
+    if (questions.length === 0) {
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => {
+                setViewMode('selectFilters');
+                setCurrentQuestionIndex(0);
+              }}
+              className="px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
+              style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 215, 0, 0.3)',
+                color: 'white'
+              }}
+            >
+              <ChevronLeft size={20} />
+              Back
+            </button>
           </div>
 
-          <button
-            onClick={() => startTest(3600)}
-            disabled={questions.length === 0}
-            className="px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
-            style={{
-              background: questions.length > 0
-                ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
-                : 'rgba(255, 255, 255, 0.1)',
-              color: questions.length > 0 ? '#1a1a4e' : '#666',
-              cursor: questions.length > 0 ? 'pointer' : 'not-allowed'
-            }}
-          >
-            <Clock size={20} />
-            Start Timed Test
-          </button>
-        </div>
-
-        {/* No Questions Found */}
-        {questions.length === 0 ? (
           <div
             className="p-12 rounded-xl text-center"
             style={{
@@ -831,160 +738,383 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
               Change Filters
             </button>
           </div>
-        ) : (
-          /* Single Question Display */
-          <div>
-            {/* Question Card */}
-            <div
+        </div>
+      );
+    }
+
+    const currentQuestion = questions[currentQuestionIndex];
+
+    // Handle option selection
+    const handleOptionSelect = (optionIndex: string) => {
+      setSelectedAnswer(optionIndex);
+      setAttemptedQuestions(prev => new Set(prev).add(currentQuestionIndex));
+    };
+
+    // Navigate to specific question
+    const goToQuestion = (index: number) => {
+      setCurrentQuestionIndex(index);
+      setSelectedAnswer(null);
+    };
+
+    // Calculate stats
+    const pendingCount = questions.length - attemptedQuestions.size;
+    const bookmarkedCount = questions.filter(q => q.bookmarked).length;
+
+    return (
+      <div style={{ display: 'flex', gap: '1.5rem', minHeight: '600px' }}>
+        {/* Left Sidebar: Question Palette */}
+        <div style={{ width: '280px', flexShrink: 0 }}>
+          {/* Statistics */}
+          <div
+            style={{
+              padding: '1.5rem',
+              borderRadius: '1rem',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 215, 0, 0.2)',
+              marginBottom: '1.5rem'
+            }}
+          >
+            <h3 style={{ color: '#FFD700', fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>
+              Statistics
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#D1D5DB', fontSize: '0.875rem' }}>Total</span>
+                <span style={{ color: 'white', fontWeight: '600' }}>{questions.length}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#10B981', fontSize: '0.875rem' }}>Attempted</span>
+                <span style={{ color: '#10B981', fontWeight: '600' }}>{attemptedQuestions.size}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#F59E0B', fontSize: '0.875rem' }}>Pending</span>
+                <span style={{ color: '#F59E0B', fontWeight: '600' }}>{pendingCount}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#B19CD9', fontSize: '0.875rem' }}>Bookmarked</span>
+                <span style={{ color: '#B19CD9', fontWeight: '600' }}>{bookmarkedCount}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Question Palette */}
+          <div
+            style={{
+              padding: '1.5rem',
+              borderRadius: '1rem',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 215, 0, 0.2)',
+              maxHeight: 'calc(100vh - 400px)',
+              overflowY: 'auto'
+            }}
+          >
+            <h3 style={{ color: '#FFD700', fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>
+              Questions
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+              {questions.map((q, index) => {
+                const isAttempted = attemptedQuestions.has(index);
+                const isCurrent = index === currentQuestionIndex;
+                const isBookmarked = q.bookmarked;
+
+                return (
+                  <button
+                    key={index}
+                    onClick={() => goToQuestion(index)}
+                    style={{
+                      padding: '0.5rem',
+                      borderRadius: '0.5rem',
+                      border: isCurrent ? '2px solid #FFD700' : '1px solid rgba(255, 255, 255, 0.1)',
+                      background: isCurrent
+                        ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
+                        : isAttempted
+                          ? 'rgba(16, 185, 129, 0.2)'
+                          : 'rgba(255, 255, 255, 0.05)',
+                      color: isCurrent ? '#1a1a4e' : isAttempted ? '#10B981' : 'white',
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {index + 1}
+                    {isBookmarked && (
+                      <span style={{ position: 'absolute', top: '2px', right: '2px', fontSize: '0.625rem' }}>
+                        ⭐
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '0.5rem', background: 'rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)' }}></div>
+                <span style={{ color: '#D1D5DB' }}>Current</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10B981' }}></div>
+                <span style={{ color: '#D1D5DB' }}>Attempted</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}></div>
+                <span style={{ color: '#D1D5DB' }}>Unattempted</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side: Question Display */}
+        <div style={{ flex: 1 }}>
+          {/* Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <button
+              onClick={() => {
+                setViewMode('selectFilters');
+                setCurrentQuestionIndex(0);
+                setAttemptedQuestions(new Set());
+                setSelectedAnswer(null);
+              }}
               style={{
-                padding: "2rem",
-                borderRadius: "1rem",
-                background: 'rgba(255, 255, 255, 0.05)',
-                backdropFilter: 'blur(10px)',
-                border: '2px solid rgba(255, 215, 0, 0.2)'
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.5rem',
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 215, 0, 0.3)',
+                color: 'white',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}
             >
-              {/* Question Header */}
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#FFD700' }}>
-                      Question {currentQuestionIndex + 1}
-                    </span>
-                    {currentQuestion.year && (
-                      <span className="px-3 py-1 rounded-full text-sm" style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#F59E0B' }}>
-                        {currentQuestion.year}
-                      </span>
-                    )}
-                    {currentQuestion.difficulty && (
-                      <span className={`px-3 py-1 rounded-full text-sm ${getDifficultyColor(currentQuestion.difficulty)}`} style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
-                        {currentQuestion.difficulty}
-                      </span>
-                    )}
-                    <span className="px-3 py-1 rounded-full text-sm" style={{ background: 'rgba(177, 156, 217, 0.2)', color: '#B19CD9' }}>
-                      {currentQuestion.subject}
-                    </span>
-                  </div>
-                  <p className="text-white text-xl leading-relaxed">{currentQuestion.question}</p>
-                </div>
+              <ChevronLeft size={20} />
+              Back to Filters
+            </button>
 
-                <button
-                  onClick={() => toggleBookmark(currentQuestion.id)}
-                  className="ml-4 p-2 rounded-lg transition-all"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)'
-                  }}
-                >
-                  <Bookmark
-                    size={24}
-                    color={currentQuestion.bookmarked ? '#FFD700' : '#666'}
-                    fill={currentQuestion.bookmarked ? '#FFD700' : 'none'}
-                  />
-                </button>
-              </div>
+            <h2 style={{ color: '#FFD700', fontSize: '1.5rem', fontWeight: 'bold' }}>
+              Question {currentQuestionIndex + 1} of {questions.length}
+            </h2>
 
-              {/* Options */}
-              <div className="space-y-3 mb-6">
-                {currentQuestion.options && Array.isArray(currentQuestion.options) ? (
-                  currentQuestion.options.map((option, optIndex) => (
+            <button
+              onClick={() => toggleBookmark(currentQuestion.id)}
+              style={{
+                padding: '0.75rem',
+                borderRadius: '0.5rem',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                cursor: 'pointer'
+              }}
+            >
+              <Bookmark
+                size={24}
+                color={currentQuestion.bookmarked ? '#FFD700' : '#666'}
+                fill={currentQuestion.bookmarked ? '#FFD700' : 'none'}
+              />
+            </button>
+          </div>
+
+          {/* Question Card */}
+          <div
+            style={{
+              padding: '2rem',
+              borderRadius: '1rem',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '2px solid rgba(255, 215, 0, 0.2)',
+              marginBottom: '1.5rem'
+            }}
+          >
+            {/* Question Meta */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+              {currentQuestion.subject && (
+                <span style={{ padding: '0.5rem 1rem', borderRadius: '9999px', fontSize: '0.875rem', background: 'rgba(177, 156, 217, 0.2)', color: '#B19CD9' }}>
+                  {currentQuestion.subject}
+                </span>
+              )}
+              {currentQuestion.year && (
+                <span style={{ padding: '0.5rem 1rem', borderRadius: '9999px', fontSize: '0.875rem', background: 'rgba(245, 158, 11, 0.2)', color: '#F59E0B' }}>
+                  {currentQuestion.year}
+                </span>
+              )}
+              {currentQuestion.difficulty && (
+                <span style={{ padding: '0.5rem 1rem', borderRadius: '9999px', fontSize: '0.875rem', background: 'rgba(59, 130, 246, 0.2)', color: '#3B82F6' }}>
+                  {currentQuestion.difficulty}
+                </span>
+              )}
+            </div>
+
+            {/* Question Text */}
+            <p style={{ color: 'white', fontSize: '1.25rem', lineHeight: '1.8', marginBottom: '2rem' }}>
+              {currentQuestion.question}
+            </p>
+
+            {/* Options */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {currentQuestion.options && Array.isArray(currentQuestion.options) ? (
+                currentQuestion.options.map((option, optIndex) => {
+                  const optionLetter = String.fromCharCode(65 + optIndex);
+                  const isSelected = selectedAnswer === optionLetter;
+
+                  return (
                     <div
                       key={optIndex}
-                      className="p-4 rounded-lg transition-all cursor-pointer hover:scale-[1.02]"
+                      onClick={() => handleOptionSelect(optionLetter)}
                       style={{
-                        background: 'rgba(255, 255, 255, 0.08)',
-                        border: '2px solid rgba(255, 255, 255, 0.1)'
+                        padding: '1.25rem',
+                        borderRadius: '0.75rem',
+                        background: isSelected ? 'rgba(255, 215, 0, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                        border: isSelected ? '2px solid #FFD700' : '2px solid rgba(255, 255, 255, 0.1)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                          e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.3)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                        }
                       }}
                     >
-                      <span className="text-gray-200 text-lg">
-                        <span style={{ color: '#FFD700', fontWeight: 'bold', marginRight: '0.75rem' }}>
-                          {String.fromCharCode(65 + optIndex)}.
-                        </span>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        background: isSelected ? '#FFD700' : 'rgba(255, 255, 255, 0.1)',
+                        color: isSelected ? '#1a1a4e' : '#FFD700',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.125rem',
+                        fontWeight: 'bold',
+                        flexShrink: 0
+                      }}>
+                        {optionLetter}
+                      </div>
+                      <span style={{ color: 'white', fontSize: '1rem', flex: 1 }}>
                         {option}
                       </span>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-red-400 text-sm">Invalid options format</p>
-                )}
-              </div>
+                  );
+                })
+              ) : (
+                <p style={{ color: '#EF4444' }}>Invalid options format</p>
+              )}
+            </div>
 
-              {/* Show Answer Button */}
-              <div className="mt-6">
-                <details className="cursor-pointer">
-                  <summary className="text-base font-semibold flex items-center gap-2 p-3 rounded-lg" style={{ color: '#FFD700', background: 'rgba(255, 215, 0, 0.05)' }}>
+            {/* Show Answer */}
+            {selectedAnswer && (
+              <div style={{ marginTop: '2rem' }}>
+                <details style={{ cursor: 'pointer' }}>
+                  <summary style={{
+                    padding: '1rem',
+                    borderRadius: '0.5rem',
+                    background: 'rgba(255, 215, 0, 0.05)',
+                    color: '#FFD700',
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
                     <Eye size={20} />
                     Show Answer & Explanation
                   </summary>
-                  <div className="mt-4 p-4 rounded-lg" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '2px solid rgba(16, 185, 129, 0.3)' }}>
-                    <p className="text-green-400 font-bold text-lg mb-3">
+                  <div style={{
+                    marginTop: '1rem',
+                    padding: '1.5rem',
+                    borderRadius: '0.75rem',
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    border: '2px solid rgba(16, 185, 129, 0.3)'
+                  }}>
+                    <p style={{ color: '#10B981', fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '1rem' }}>
                       Correct Answer: {currentQuestion.answer}
                     </p>
                     {currentQuestion.detailed_explanation && (
-                      <p className="text-gray-300 text-base leading-relaxed">{currentQuestion.detailed_explanation}</p>
+                      <p style={{ color: '#D1D5DB', fontSize: '1rem', lineHeight: '1.6' }}>
+                        {currentQuestion.detailed_explanation}
+                      </p>
                     )}
                   </div>
                 </details>
               </div>
-            </div>
-
-            {/* Navigation Buttons */}
-            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <button
-                onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
-                disabled={currentQuestionIndex === 0}
-                style={{
-                  padding: '1rem 2rem',
-                  borderRadius: '0.75rem',
-                  fontWeight: '600',
-                  fontSize: '1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  cursor: currentQuestionIndex === 0 ? 'not-allowed' : 'pointer',
-                  border: 'none',
-                  background: currentQuestionIndex === 0 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.15)',
-                  color: currentQuestionIndex === 0 ? '#666' : 'white',
-                  transition: 'all 0.3s'
-                }}
-              >
-                <ChevronLeft size={20} />
-                Previous
-              </button>
-
-              <div style={{ textAlign: 'center' }}>
-                <p style={{ color: '#FFD700', fontWeight: '600', fontSize: '1rem' }}>
-                  {currentQuestionIndex + 1} / {questions.length}
-                </p>
-              </div>
-
-              <button
-                onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
-                disabled={currentQuestionIndex === questions.length - 1}
-                style={{
-                  padding: '1rem 2rem',
-                  borderRadius: '0.75rem',
-                  fontWeight: '600',
-                  fontSize: '1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  cursor: currentQuestionIndex === questions.length - 1 ? 'not-allowed' : 'pointer',
-                  border: 'none',
-                  background: currentQuestionIndex === questions.length - 1
-                    ? 'rgba(255, 255, 255, 0.1)'
-                    : 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
-                  color: currentQuestionIndex === questions.length - 1 ? '#666' : '#1a1a4e',
-                  transition: 'all 0.3s',
-                  boxShadow: currentQuestionIndex === questions.length - 1 ? 'none' : '0 4px 16px rgba(255, 215, 0, 0.3)'
-                }}
-              >
-                Next
-                <ChevronRight size={20} />
-              </button>
-            </div>
+            )}
           </div>
-        )}
+
+          {/* Navigation */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <button
+              onClick={() => {
+                if (currentQuestionIndex > 0) {
+                  setCurrentQuestionIndex(currentQuestionIndex - 1);
+                  setSelectedAnswer(null);
+                }
+              }}
+              disabled={currentQuestionIndex === 0}
+              style={{
+                padding: '1rem 2rem',
+                borderRadius: '0.75rem',
+                border: 'none',
+                background: currentQuestionIndex === 0 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.15)',
+                color: currentQuestionIndex === 0 ? '#666' : 'white',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: currentQuestionIndex === 0 ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <ChevronLeft size={20} />
+              Previous
+            </button>
+
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ color: '#FFD700', fontWeight: '600', fontSize: '1.125rem' }}>
+                {currentQuestionIndex + 1} / {questions.length}
+              </p>
+            </div>
+
+            <button
+              onClick={() => {
+                if (currentQuestionIndex < questions.length - 1) {
+                  setCurrentQuestionIndex(currentQuestionIndex + 1);
+                  setSelectedAnswer(null);
+                }
+              }}
+              disabled={currentQuestionIndex === questions.length - 1}
+              style={{
+                padding: '1rem 2rem',
+                borderRadius: '0.75rem',
+                border: 'none',
+                background: currentQuestionIndex === questions.length - 1
+                  ? 'rgba(255, 255, 255, 0.1)'
+                  : 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                color: currentQuestionIndex === questions.length - 1 ? '#666' : '#1a1a4e',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: currentQuestionIndex === questions.length - 1 ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              Next
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        </div>
       </div>
     );
   };
@@ -1245,8 +1375,9 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
 
         {/* Additional Stats */}
         <div
-          style={{padding: "1.5rem", borderRadius: "0.75rem"}}
           style={{
+            padding: "1.5rem",
+            borderRadius: "0.75rem",
             background: 'rgba(255, 255, 255, 0.05)',
             border: '1px solid rgba(255, 255, 255, 0.1)'
           }}
@@ -1347,8 +1478,9 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
             return (
               <div
                 key={question.id}
-                style={{padding: "1.5rem", borderRadius: "0.75rem"}}
                 style={{
+                  padding: "1.5rem",
+                  borderRadius: "0.75rem",
                   background: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid ' + (isCorrect ? 'rgba(16, 185, 129, 0.3)' : isSkipped ? 'rgba(156, 163, 175, 0.3)' : 'rgba(239, 68, 68, 0.3)')
                 }}
