@@ -101,9 +101,9 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
       const exams = await examBotService.getExamCategories();
       setExamCategories(exams);
 
-      // Load topics
-      const allTopics = await examBotService.getTopics();
-      setTopics(allTopics);
+      // Don't load all topics initially - will load based on selected exam
+      // const allTopics = await examBotService.getTopics();
+      // setTopics(allTopics);
 
       setLoading(false);
     } catch (err: any) {
@@ -350,9 +350,7 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
             Practice with database-stored questions. Select filters and start practicing!
           </p>
         </div>
-        <div className="absolute top-0 right-0 w-64 h-64 opacity-10">
-          <BookOpen size={256} color="#FFD700" />
-        </div>
+        {/* Removed large decorative icon */}
       </div>
 
       {/* Statistics */}
