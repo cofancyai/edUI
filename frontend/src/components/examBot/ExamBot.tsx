@@ -1265,9 +1265,12 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
 
   return (
     <div
-      className="min-h-screen p-6"
+      className="w-full"
       style={{
-        background: 'linear-gradient(135deg, #1a1a4e 0%, #2E1A47 100%)'
+        background: 'linear-gradient(135deg, #1a1a4e 0%, #2E1A47 100%)',
+        borderRadius: '12px',
+        padding: '1.5rem',
+        minHeight: 'calc(100vh - 200px)'
       }}
     >
       <div className="max-w-7xl mx-auto">
