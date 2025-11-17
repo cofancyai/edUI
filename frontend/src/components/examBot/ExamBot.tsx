@@ -47,6 +47,7 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
   // Data from Supabase
   const [examCategories, setExamCategories] = useState<ExamCategory[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
+  const [filteredTopics, setFilteredTopics] = useState<Topic[]>([]);
   const [subtopics, setSubtopics] = useState<Subtopic[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
@@ -101,9 +102,9 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
       const exams = await examBotService.getExamCategories();
       setExamCategories(exams);
 
-      // Don't load all topics initially - will load based on selected exam
-      // const allTopics = await examBotService.getTopics();
-      // setTopics(allTopics);
+      // Load all topics (for reference)
+      const allTopics = await examBotService.getTopics();
+      setTopics(allTopics);
 
       setLoading(false);
     } catch (err: any) {
@@ -143,8 +144,8 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
 
       // Filter topics to only show those with questions
       const topicIds = topicsList.map(t => t.topic_id);
-      const filteredTopics = topics.filter(t => topicIds.includes(t.id));
-      setTopics(filteredTopics);
+      const filtered = topics.filter(t => topicIds.includes(t.id));
+      setFilteredTopics(filtered);
 
       setLoading(false);
     } catch (err: any) {
@@ -490,7 +491,7 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
                 }}
               >
                 <option value="">All Topics</option>
-                {topics.map(topic => (
+                {filteredTopics.map(topic => (
                   <option key={topic.id} value={topic.id} style={{ background: '#1a1a4e' }}>
                     {topic.name}
                   </option>
