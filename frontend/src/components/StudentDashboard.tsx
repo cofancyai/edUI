@@ -3,6 +3,7 @@ import { Bell, User, LogOut } from 'lucide-react';
 import AITutor from './AITutor';
 import Navigation from './Navigation';
 import Quiz from './quiz/Quiz';
+import Aptitude from './Aptitude';
 import ComingSoon from './ComingSoon';
 
 const StudentDashboard: React.FC = () => {
@@ -114,20 +115,24 @@ const StudentDashboard: React.FC = () => {
         {selectedMenu === 'AI Tutor' && (
           <AITutor />
         )}
-        
+
         {selectedMenu === 'Exam bot' && (
           <Quiz />
         )}
-        
+
+        {selectedMenu === 'Aptitude' && (
+          <Aptitude />
+        )}
+
         {selectedMenu === 'Mock Test' && (
           <Quiz />
         )}
-        
+
         {selectedMenu === 'Current Affairs' && (
           <Quiz initialTopic="Current Affairs" />
         )}
-        
-        {!['AI Tutor', 'Exam bot', 'Mock Test', 'Current Affairs'].includes(selectedMenu) && (
+
+        {!['AI Tutor', 'Exam bot', 'Aptitude', 'Mock Test', 'Current Affairs'].includes(selectedMenu) && (
           <ComingSoon featureName={selectedMenu} />
         )}
       </div>
