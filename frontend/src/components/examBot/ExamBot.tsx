@@ -758,146 +758,118 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
     </div>
   );
 
-  const renderPractice = () => (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => setViewMode('selectFilters')}
-          className="px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
-          style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            border: '1px solid rgba(255, 215, 0, 0.3)',
-            color: 'white'
-          }}
-        >
-          <ChevronLeft size={20} />
-          Back
-        </button>
+  const renderPractice = () => {
+    const currentQuestion = questions[currentQuestionIndex];
 
-        <h2 className="text-2xl font-bold" style={{ color: '#FFD700' }}>
-          Practice Mode
-        </h2>
-
-        <button
-          onClick={() => startTest(3600)}
-          disabled={questions.length === 0}
-          className="px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
-          style={{
-            background: questions.length > 0
-              ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
-              : 'rgba(255, 255, 255, 0.1)',
-            color: questions.length > 0 ? '#1a1a4e' : '#666',
-            cursor: questions.length > 0 ? 'pointer' : 'not-allowed'
-          }}
-        >
-          <Clock size={20} />
-          Start Timed Test
-        </button>
-      </div>
-
-      {/* Applied Filters */}
-      <div
-        style={{padding: "1rem", borderRadius: "0.5rem"}}
-        style={{
-          background: 'rgba(255, 255, 255, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.1)'
-        }}
-      >
-        <div style={{display: "flex", flexWrap: "wrap", gap: "0.5rem"}}>
-          {filters.exam && (
-            <span style={{padding: "0.25rem 0.75rem", borderRadius: "9999px", fontSize: "0.875rem"}} style={{ background: 'rgba(255, 215, 0, 0.2)', color: '#FFD700' }}>
-              {filters.exam}
-            </span>
-          )}
-          {filters.subject && (
-            <span style={{padding: "0.25rem 0.75rem", borderRadius: "9999px", fontSize: "0.875rem"}} style={{ background: 'rgba(177, 156, 217, 0.2)', color: '#B19CD9' }}>
-              {filters.subject}
-            </span>
-          )}
-          {filters.topic && topics.find(t => t.id === filters.topic) && (
-            <span style={{padding: "0.25rem 0.75rem", borderRadius: "9999px", fontSize: "0.875rem"}} style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10B981' }}>
-              {topics.find(t => t.id === filters.topic)?.name}
-            </span>
-          )}
-          {filters.subtopic && subtopics.find(s => s.id === filters.subtopic) && (
-            <span style={{padding: "0.25rem 0.75rem", borderRadius: "9999px", fontSize: "0.875rem"}} style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#3B82F6' }}>
-              {subtopics.find(s => s.id === filters.subtopic)?.name}
-            </span>
-          )}
-          {filters.year && (
-            <span style={{padding: "0.25rem 0.75rem", borderRadius: "9999px", fontSize: "0.875rem"}} style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#F59E0B' }}>
-              Year: {filters.year}
-            </span>
-          )}
-          {filters.difficulty && (
-            <span className={`px-3 py-1 rounded-full text-sm ${getDifficultyColor(filters.difficulty)}`} style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
-              {filters.difficulty}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Questions List */}
-      {questions.length === 0 ? (
-        <div
-          className="p-12 rounded-xl text-center"
-          style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}
-        >
-          <BookOpen size={64} color="#666" className="mx-auto mb-4" />
-          <p className="text-gray-400 text-lg">No questions found for selected filters</p>
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
           <button
-            onClick={() => setViewMode('selectFilters')}
-            className="mt-4 px-6 py-2 rounded-lg"
+            onClick={() => {
+              setViewMode('selectFilters');
+              setCurrentQuestionIndex(0);
+            }}
+            className="px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
             style={{
-              background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
-              color: '#1a1a4e'
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 215, 0, 0.3)',
+              color: 'white'
             }}
           >
-            Change Filters
+            <ChevronLeft size={20} />
+            Back
+          </button>
+
+          <div style={{ textAlign: 'center' }}>
+            <h2 className="text-2xl font-bold" style={{ color: '#FFD700' }}>
+              Practice Mode
+            </h2>
+            {questions.length > 0 && (
+              <p className="text-gray-400 text-sm">
+                Question {currentQuestionIndex + 1} of {questions.length}
+              </p>
+            )}
+          </div>
+
+          <button
+            onClick={() => startTest(3600)}
+            disabled={questions.length === 0}
+            className="px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
+            style={{
+              background: questions.length > 0
+                ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
+                : 'rgba(255, 255, 255, 0.1)',
+              color: questions.length > 0 ? '#1a1a4e' : '#666',
+              cursor: questions.length > 0 ? 'pointer' : 'not-allowed'
+            }}
+          >
+            <Clock size={20} />
+            Start Timed Test
           </button>
         </div>
-      ) : (
-        <div className="space-y-4">
-          <p className="text-gray-400">Found {questions.length} questions</p>
 
-          {questions.map((question, index) => (
-            <div
-              key={question.id}
-              style={{padding: "1.5rem", borderRadius: "0.75rem"}}
+        {/* No Questions Found */}
+        {questions.length === 0 ? (
+          <div
+            className="p-12 rounded-xl text-center"
+            style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}
+          >
+            <BookOpen size={64} color="#666" className="mx-auto mb-4" />
+            <p className="text-gray-400 text-lg">No questions found for selected filters</p>
+            <button
+              onClick={() => setViewMode('selectFilters')}
+              className="mt-4 px-6 py-2 rounded-lg"
               style={{
+                background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                color: '#1a1a4e'
+              }}
+            >
+              Change Filters
+            </button>
+          </div>
+        ) : (
+          /* Single Question Display */
+          <div>
+            {/* Question Card */}
+            <div
+              style={{
+                padding: "2rem",
+                borderRadius: "1rem",
                 background: 'rgba(255, 255, 255, 0.05)',
                 backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
+                border: '2px solid rgba(255, 215, 0, 0.2)'
               }}
             >
               {/* Question Header */}
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start justify-between mb-6">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm text-gray-400">Q{index + 1}</span>
-                    {question.year && (
-                      <span className="px-2 py-1 rounded text-xs" style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#F59E0B' }}>
-                        {question.year}
+                  <div className="flex items-center gap-2 mb-3">
+                    <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#FFD700' }}>
+                      Question {currentQuestionIndex + 1}
+                    </span>
+                    {currentQuestion.year && (
+                      <span className="px-3 py-1 rounded-full text-sm" style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#F59E0B' }}>
+                        {currentQuestion.year}
                       </span>
                     )}
-                    {question.difficulty && (
-                      <span className={`px-2 py-1 rounded text-xs ${getDifficultyColor(question.difficulty)}`} style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
-                        {question.difficulty}
+                    {currentQuestion.difficulty && (
+                      <span className={`px-3 py-1 rounded-full text-sm ${getDifficultyColor(currentQuestion.difficulty)}`} style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
+                        {currentQuestion.difficulty}
                       </span>
                     )}
-                    <span className="px-2 py-1 rounded text-xs" style={{ background: 'rgba(177, 156, 217, 0.2)', color: '#B19CD9' }}>
-                      {question.subject}
+                    <span className="px-3 py-1 rounded-full text-sm" style={{ background: 'rgba(177, 156, 217, 0.2)', color: '#B19CD9' }}>
+                      {currentQuestion.subject}
                     </span>
                   </div>
-                  <p className="text-white text-lg">{question.question}</p>
+                  <p className="text-white text-xl leading-relaxed">{currentQuestion.question}</p>
                 </div>
 
                 <button
-                  onClick={() => toggleBookmark(question.id)}
+                  onClick={() => toggleBookmark(currentQuestion.id)}
                   className="ml-4 p-2 rounded-lg transition-all"
                   style={{
                     background: 'rgba(255, 255, 255, 0.05)',
@@ -905,26 +877,31 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
                   }}
                 >
                   <Bookmark
-                    size={20}
-                    color={question.bookmarked ? '#FFD700' : '#666'}
-                    fill={question.bookmarked ? '#FFD700' : 'none'}
+                    size={24}
+                    color={currentQuestion.bookmarked ? '#FFD700' : '#666'}
+                    fill={currentQuestion.bookmarked ? '#FFD700' : 'none'}
                   />
                 </button>
               </div>
 
               {/* Options */}
-              <div className="space-y-2">
-                {question.options && Array.isArray(question.options) ? (
-                  question.options.map((option, optIndex) => (
+              <div className="space-y-3 mb-6">
+                {currentQuestion.options && Array.isArray(currentQuestion.options) ? (
+                  currentQuestion.options.map((option, optIndex) => (
                     <div
                       key={optIndex}
-                      className="p-3 rounded-lg"
+                      className="p-4 rounded-lg transition-all cursor-pointer hover:scale-[1.02]"
                       style={{
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)'
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        border: '2px solid rgba(255, 255, 255, 0.1)'
                       }}
                     >
-                      <span className="text-gray-300">{String.fromCharCode(65 + optIndex)}. {option}</span>
+                      <span className="text-gray-200 text-lg">
+                        <span style={{ color: '#FFD700', fontWeight: 'bold', marginRight: '0.75rem' }}>
+                          {String.fromCharCode(65 + optIndex)}.
+                        </span>
+                        {option}
+                      </span>
                     </div>
                   ))
                 ) : (
@@ -933,28 +910,84 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
               </div>
 
               {/* Show Answer Button */}
-              <div className="mt-4">
+              <div className="mt-6">
                 <details className="cursor-pointer">
-                  <summary className="text-sm font-semibold flex items-center gap-2" style={{ color: '#FFD700' }}>
-                    <Eye size={16} />
+                  <summary className="text-base font-semibold flex items-center gap-2 p-3 rounded-lg" style={{ color: '#FFD700', background: 'rgba(255, 215, 0, 0.05)' }}>
+                    <Eye size={20} />
                     Show Answer & Explanation
                   </summary>
-                  <div className="mt-3 p-4 rounded-lg" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                    <p className="text-green-400 font-semibold mb-2">
-                      Correct Answer: {question.answer}
+                  <div className="mt-4 p-4 rounded-lg" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '2px solid rgba(16, 185, 129, 0.3)' }}>
+                    <p className="text-green-400 font-bold text-lg mb-3">
+                      Correct Answer: {currentQuestion.answer}
                     </p>
-                    {question.detailed_explanation && (
-                      <p className="text-gray-300 text-sm">{question.detailed_explanation}</p>
+                    {currentQuestion.detailed_explanation && (
+                      <p className="text-gray-300 text-base leading-relaxed">{currentQuestion.detailed_explanation}</p>
                     )}
                   </div>
                 </details>
               </div>
             </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+
+            {/* Navigation Buttons */}
+            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button
+                onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
+                disabled={currentQuestionIndex === 0}
+                style={{
+                  padding: '1rem 2rem',
+                  borderRadius: '0.75rem',
+                  fontWeight: '600',
+                  fontSize: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: currentQuestionIndex === 0 ? 'not-allowed' : 'pointer',
+                  border: 'none',
+                  background: currentQuestionIndex === 0 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.15)',
+                  color: currentQuestionIndex === 0 ? '#666' : 'white',
+                  transition: 'all 0.3s'
+                }}
+              >
+                <ChevronLeft size={20} />
+                Previous
+              </button>
+
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ color: '#FFD700', fontWeight: '600', fontSize: '1rem' }}>
+                  {currentQuestionIndex + 1} / {questions.length}
+                </p>
+              </div>
+
+              <button
+                onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
+                disabled={currentQuestionIndex === questions.length - 1}
+                style={{
+                  padding: '1rem 2rem',
+                  borderRadius: '0.75rem',
+                  fontWeight: '600',
+                  fontSize: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: currentQuestionIndex === questions.length - 1 ? 'not-allowed' : 'pointer',
+                  border: 'none',
+                  background: currentQuestionIndex === questions.length - 1
+                    ? 'rgba(255, 255, 255, 0.1)'
+                    : 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                  color: currentQuestionIndex === questions.length - 1 ? '#666' : '#1a1a4e',
+                  transition: 'all 0.3s',
+                  boxShadow: currentQuestionIndex === questions.length - 1 ? 'none' : '0 4px 16px rgba(255, 215, 0, 0.3)'
+                }}
+              >
+                Next
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderTest = () => {
     if (!testSession) return null;
