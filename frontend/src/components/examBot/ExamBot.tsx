@@ -1052,6 +1052,58 @@ const ExamBot: React.FC<ExamBotProps> = () => {
             )}
           </div>
 
+          {/* Submit Practice Button - Shows when all questions attempted */}
+          {attemptedQuestions.size === questions.length && (
+            <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+              <button
+                onClick={() => {
+                  const completionMessage = `Practice Session Complete!\n\n` +
+                    `📊 Summary:\n` +
+                    `• Total Questions: ${questions.length}\n` +
+                    `• Attempted: ${attemptedQuestions.size}\n` +
+                    `• Completion: 100%\n\n` +
+                    `Great job! You've reviewed all questions.`;
+
+                  if (window.confirm(completionMessage + '\n\nWould you like to return to filter selection?')) {
+                    setViewMode('selectFilters');
+                    setCurrentQuestionIndex(0);
+                    setAttemptedQuestions(new Set());
+                    setSelectedAnswer(null);
+                  }
+                }}
+                style={{
+                  padding: '1rem 3rem',
+                  borderRadius: '0.75rem',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                  color: 'white',
+                  fontSize: '1.125rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  boxShadow: '0 4px 16px rgba(16, 185, 129, 0.4)',
+                  transition: 'all 0.3s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(16, 185, 129, 0.4)';
+                }}
+              >
+                <CheckCircle size={24} />
+                Submit Practice Session
+              </button>
+              <p style={{ marginTop: '1rem', color: '#10B981', fontSize: '0.875rem', fontWeight: '600' }}>
+                ✓ All questions attempted! Ready to submit.
+              </p>
+            </div>
+          )}
+
           {/* Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <button
