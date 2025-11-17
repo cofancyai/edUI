@@ -475,14 +475,17 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
           </div>
 
           {/* Subject Filter */}
-          {filters.exam && (
+          {filters.exam && availableSubjects.length > 0 && (
             <div>
               <label style={{display: "block", fontSize: "0.875rem", color: "#D1D5DB", marginBottom: "0.5rem"}}>Subject</label>
               <select
                 value={filters.subject}
                 onChange={(e) => handleFilterChange('subject', e.target.value)}
-                style={{width: "100%", padding: "0.5rem 1rem", borderRadius: "0.5rem", outline: "none"}}
                 style={{
+                  width: "100%",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "0.5rem",
+                  outline: "none",
                   background: 'rgba(255, 255, 255, 0.1)',
                   border: '1px solid rgba(255, 215, 0, 0.3)',
                   color: 'white'
@@ -499,14 +502,17 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
           )}
 
           {/* Topic Filter */}
-          {filters.exam && (
+          {filters.exam && filteredTopics.length > 0 && (
             <div>
               <label style={{display: "block", fontSize: "0.875rem", color: "#D1D5DB", marginBottom: "0.5rem"}}>Topic</label>
               <select
                 value={filters.topic}
                 onChange={(e) => handleFilterChange('topic', e.target.value)}
-                style={{width: "100%", padding: "0.5rem 1rem", borderRadius: "0.5rem", outline: "none"}}
                 style={{
+                  width: "100%",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "0.5rem",
+                  outline: "none",
                   background: 'rgba(255, 255, 255, 0.1)',
                   border: '1px solid rgba(255, 215, 0, 0.3)',
                   color: 'white'
@@ -523,14 +529,17 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
           )}
 
           {/* Subtopic Filter */}
-          {filters.topic && (
+          {filters.topic && subtopics.length > 0 && (
             <div>
               <label style={{display: "block", fontSize: "0.875rem", color: "#D1D5DB", marginBottom: "0.5rem"}}>Subtopic</label>
               <select
                 value={filters.subtopic}
                 onChange={(e) => handleFilterChange('subtopic', e.target.value)}
-                style={{width: "100%", padding: "0.5rem 1rem", borderRadius: "0.5rem", outline: "none"}}
                 style={{
+                  width: "100%",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "0.5rem",
+                  outline: "none",
                   background: 'rgba(255, 255, 255, 0.1)',
                   border: '1px solid rgba(255, 215, 0, 0.3)',
                   color: 'white'
@@ -553,8 +562,11 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
               <select
                 value={filters.year || ''}
                 onChange={(e) => handleFilterChange('year', e.target.value ? Number(e.target.value) : null)}
-                style={{width: "100%", padding: "0.5rem 1rem", borderRadius: "0.5rem", outline: "none"}}
                 style={{
+                  width: "100%",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "0.5rem",
+                  outline: "none",
                   background: 'rgba(255, 255, 255, 0.1)',
                   border: '1px solid rgba(255, 215, 0, 0.3)',
                   color: 'white'
