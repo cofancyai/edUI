@@ -327,10 +327,10 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
 
   // Render functions for different views
   const renderHome = () => (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Welcome Banner */}
       <div
-        className="relative p-8 rounded-2xl overflow-hidden"
+        style={{position: "relative", padding: "2rem", borderRadius: "1rem", overflow: "hidden"}}
         style={{
           background: 'linear-gradient(135deg, rgba(30, 26, 71, 0.95) 0%, rgba(46, 26, 71, 0.95) 100%)',
           backdropFilter: 'blur(10px)',
@@ -352,9 +352,9 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
       </div>
 
       {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', marginTop: '1.5rem' }}>
         <div
-          className="p-6 rounded-xl"
+          style={{padding: "1.5rem", borderRadius: "0.75rem"}}
           style={{
             background: 'rgba(255, 255, 255, 0.05)',
             backdropFilter: 'blur(10px)',
@@ -373,7 +373,7 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
         </div>
 
         <div
-          className="p-6 rounded-xl"
+          style={{padding: "1.5rem", borderRadius: "0.75rem"}}
           style={{
             background: 'rgba(255, 255, 255, 0.05)',
             backdropFilter: 'blur(10px)',
@@ -392,7 +392,7 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
         </div>
 
         <div
-          className="p-6 rounded-xl"
+          style={{padding: "1.5rem", borderRadius: "0.75rem"}}
           style={{
             background: 'rgba(255, 255, 255, 0.05)',
             backdropFilter: 'blur(10px)',
@@ -413,7 +413,7 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
 
       {/* Filters Section */}
       <div
-        className="p-6 rounded-xl"
+        style={{padding: "1.5rem", borderRadius: "0.75rem"}}
         style={{
           background: 'rgba(255, 255, 255, 0.05)',
           backdropFilter: 'blur(10px)',
@@ -425,7 +425,7 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
           Select Filters
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           {/* Exam Filter */}
           <div>
             <label className="block text-sm text-gray-300 mb-2">Exam</label>
@@ -718,7 +718,7 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
           {questions.map((question, index) => (
             <div
               key={question.id}
-              className="p-6 rounded-xl"
+              style={{padding: "1.5rem", borderRadius: "0.75rem"}}
               style={{
                 background: 'rgba(255, 255, 255, 0.05)',
                 backdropFilter: 'blur(10px)',
@@ -1063,7 +1063,7 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
 
         {/* Additional Stats */}
         <div
-          className="p-6 rounded-xl"
+          style={{padding: "1.5rem", borderRadius: "0.75rem"}}
           style={{
             background: 'rgba(255, 255, 255, 0.05)',
             border: '1px solid rgba(255, 255, 255, 0.1)'
@@ -1165,7 +1165,7 @@ const ExamBot: React.FC<ExamBotProps> = ({ selectedLanguage = 'en', isAuthentica
             return (
               <div
                 key={question.id}
-                className="p-6 rounded-xl"
+                style={{padding: "1.5rem", borderRadius: "0.75rem"}}
                 style={{
                   background: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid ' + (isCorrect ? 'rgba(16, 185, 129, 0.3)' : isSkipped ? 'rgba(156, 163, 175, 0.3)' : 'rgba(239, 68, 68, 0.3)')
